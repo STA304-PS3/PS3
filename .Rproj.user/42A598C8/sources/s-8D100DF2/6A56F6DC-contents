@@ -1,0 +1,63 @@
+#### Preamble ####
+# Purpose: In this file we are interested in using some data from a survey about 
+# name change after marriage that was conducted in 2019 by Phillip Cohen. We want 
+# to clean the data to prepare it for regression analysis.
+# Name: Rohan Alexander
+# Date: 8 October 2020
+# Pre-reqs: Need to have downloaded the data from: https://osf.io/8n9se/. That 
+# dataset is available in the inputs folder.
+
+
+#### Workspace set-up ####
+library(tidyverse)
+library(haven)
+
+raw_data <- read_dta('inputs/MNCS-PV2.dta')
+
+
+#### Data cleaning ####
+# Reduce the dataset to variables of interest
+reduced_data <- 
+  raw_data %>% 
+  select(yrmar,
+         agemar,
+         agemarc,
+         genmar,
+         spgenmar,
+         namechg,
+         ednow,
+         state
+         ) %>% 
+  filter(!is.na(agemar), !is.na(yrmar))
+
+# Build the variables that are of interest
+cleaned_data <- 
+  reduced_data %>% 
+  filter(genmar==2&spgenmar==1) %>% 
+  mutate(kept_name = as.numeric(namechg==1),
+         state_name = str_to_lower(as.character(factor(state, 
+                                                       levels = attributes(reduced_data$state)$labels, 
+                                                       labels = names(attributes(reduced_data$state)$labels)))),
+         age = agemar + (2019-yrmar),
+         age_group = (as.character(cut(age, 
+                                       breaks = c(seq(15, 80, by = 5), Inf),
+                                       labels = seq(15, 80, by = 5), right = FALSE
+         ))),
+         decade_married = (as.character(cut(yrmar, 
+                                            breaks = c(seq(1969, 2019, by = 10), Inf),
+                                            labels = seq(1969, 2019, by = 10), right = FALSE
+         ))),
+         educ_group = case_when(
+           ednow<5 ~ "<BA",
+           ednow==5 ~ "BA",
+           ednow>5 ~ ">BA",
+           TRUE ~ "NA"
+         ))
+
+cleaned_data <- 
+  cleaned_data %>% 
+  select(kept_name, state_name, age_group, decade_married, educ_group) %>% 
+  filter(age_group > 20, age_group < 80, decade_married > 1969)
+
+write_csv(cleaned_data, "outputs/cleaned_data.csv")
+

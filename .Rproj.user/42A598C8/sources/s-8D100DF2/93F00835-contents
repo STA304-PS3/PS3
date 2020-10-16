@@ -9,7 +9,8 @@
 # possible values. In that we embed some R code that will do a replacement. We 
 # then apply that dataset to the raw dataset. Finally we do all the usual cleaning.
 # to the dataset. You will end up with a dataset called gss.csv.
-# Authors: Rohan Alexander and Sam Caetano
+# Authors: Rohan Alexander and Sam Caetano 
+# Minor Edits made by: Ben Draskovic
 # Contact: rohan.alexander@utoronto.ca
 # Date: 7 October 2020
 # License: MIT
@@ -177,7 +178,8 @@ gss <- raw_data %>%
          csp_110c,
          csp_110d,
          csp_160,
-         fi_110) %>% 
+         fi_110,
+         sexpr) %>% 
   mutate_at(vars(agedc:fi_110), .funs = funs(ifelse(.>=96, NA, .))) %>% 
   mutate_at(.vars = vars(sex:fi_110),
             .funs = funs(eval(parse(text = cw_statements %>%
@@ -222,7 +224,7 @@ gss <- gss %>%
          partner_birth_country = brthpcan,
          partner_birth_province = brtpprvc,
          partner_vis_minority = visminpr,
-         partner_sex = rsh_125a,
+         partner_sex = sexpr,
          partner_education = eop_200,
          average_hours_worked = uhw_16gr,
          worked_last_week = lmam_01,

@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1602861972908.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "20D6B233",
+    "lastKnownWriteTime" : 1602851671,
+    "last_content_update" : 1602851671,
+    "path" : "~/U of T/2020 Fall/STA304/Canadian-Women-s-Decision-to-Change-Their-Last-Name-2017/Inputs/gss_labels-1.txt",
+    "project_path" : "Inputs/gss_labels-1.txt",
+    "properties" : {
+        "cursorPosition" : "493,18",
+        "scrollLine" : "473"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 11,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "text"
+}

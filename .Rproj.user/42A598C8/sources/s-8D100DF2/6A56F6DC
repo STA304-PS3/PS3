@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1602860633663.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1167062952",
+    "id" : "6A56F6DC",
+    "lastKnownWriteTime" : 1602860631,
+    "last_content_update" : 1602860631,
+    "path" : "~/U of T/2020 Fall/STA304/00-data_cleaning.R",
+    "project_path" : null,
+    "properties" : {
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 7,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

@@ -1,0 +1,619 @@
+
+---
+title: "Quebec Federal Elections — The Effect of Quebecois Protectionism"
+author: "Ben Draskovic, Arjun Dhatt, Gantavya Gupta"
+date: "10/8/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(dplyr)
+library(janitor)
+library(gridExtra)
+```
+
+
+```{r, include=FALSE}
+set.seed(624)
+##The Sampling Method##
+Quebec_survey_data <- tibble( 
+  Response_ID = (c(1:20000)),
+  Gender = sample(x = c("Male", "Female", "Non-Binary", "Other", "Prefer not to say"), 
+                  size = 20000, replace = TRUE, prob = c(0.48, 0.50, 0.01, 0.001, 0.009)), 
+  #Based on Stats Can Census 2016 (Statistics Canada 2019)
+  Age = sample(x = c("18 - 29 years old", "30 - 44 years old", "45 - 59 years old", "60+ years old", "17 years old or younger"), 
+               size = 20000, replace = TRUE, prob = c(0.170, 0.192, 0.217, 0.252, 0.169)), 
+  #Based on Stats Can Census 2016 (Statistics Canada 2019)
+  Region = sample(x = c("Urban", "Town", "Rural"), size = 20000, replace = TRUE, prob = c(0.592, 0.086, 0.322)), 
+  #Based on Duffin's 2016 surveys (Duffin 2019)
+  Last_election = sample(x = c("I did not vote in the last federal election", "I voted for the Liberal party", "I voted for the Conservative party", "I voted for the NDP party", "I voted for the Green party", "I voted for the Bloc Quebecois", "I voted for a party not listed above"), size = 20000, replace = TRUE, prob = c(0.327, 0.231, 0.108, 0.073, 0.030, 0.218, 0.013)), 
+  #Based on Elections Canada results in 2019 (Elections Canada 2019)
+  Upcoming_election = sample(x = c("I do not plan to vote", "Liberal Party", "Conservative Party", "NDP Party", "Green Party", "Bloc Quebecois", "A party not listed above"), size = 20000, replace = TRUE, prob = c(0.327, 0.23, 0.11, 0.024, 0.038, 0.26, 0.011)),
+  #Took the difference in percentage of votes each party got from 2015-2019 in  Quebec. Divided that difference by 2 making the assumption that the extreme trends would slow and assumed the same level of voter participation (Elections Canada 2019)
+  Area_for_Improvement = sample(x = c("Quebec Independenc", "Immigration", "Education", "Health Care", "Environment", "Other"), size = 20000, replace = TRUE, prob = c(0.15,0.15,0.1,0.3,0.15,0.15)),
+  #The probabilities are more difficult to simmulate for this variable. However based upon the finding of Angus Reid Institute's Survey these are some of the stand out categories. Also the rough distribution found was a large focus on Health care with fairly similar rate of interest in other issues (Angus Reid Institute 2018)
+  Protect_Culture = sample(x = c(1:5), size = 20000, replace = TRUE, prob = c(0.1, 0.2, 0.3, 0.2, 0.2)),
+  #Based upon the the authors' perception that most in quebec belief that some level of protection is needed, and the continued existance of succession movements where 35% of Angus Reid Institute's survery respondants favored Quebec Sovereignty  (Angus Reid Institute 2018)
+  Identity_Under_Threat = sample(x = c("Yes, Quebecois identity is under threat.", "No, it is a fictional issue.", "There are some threats but they are exaggerated.", "Don't Know"), size = 20000, replace = TRUE, prob = c(0.4,0.3,0.25,0.05))
+  #Based upon the response to Angus Reid Institute's survey on Quebec Sovereignty, assuming a slightly higher rate would beleive that there is a credible threat than those seeking Independence, and that there would be a split among those not seeking independence on how they respond between Fictional issue and exagerated  (Angus Reid Institute 2016)
+)
+```
+
+
+# Executive Summary 
+
+The focus of this report is to determine why the Liberal Party lost many seats to the Bloc Quebecois in the province of Quebec. Being hired by the Liberal Party, we are determined to find the appropriate reasons by sampling the province of Quebec and analysing the results.  
+
+To begin, we created a survey to gather information from various individuals residing in Quebec. We then randomly distributed the survey (without replacement) in Quebec ensuring that we target all regions of Quebec. Random sampling without replacement ensures that our survey is truly random, reducing any bias, and sampling without replacement ensures that we don’t sample the same person twice. The survey will be distributed through SMS text messaging as well as mail in order to reach as many respondents as possible and avoid bias. In order to assure respondents of our legitimacy, we plan to disclose our connection to the Liberal government which would also avoid the categorization of our survey as spam.  
+
+In our analysis, we used R to simulate results to see what we could expect when we release the survey in the real world. To begin, we found that the results of our simulated survey were roughly the same as the demographic of the Quebec population.  Additionally, the general percentage of respondents of different genders also follows the Quebec population values. The two-pronged method — SMS text and mail surveys — was successful in reaching Quebecers who lived in smaller or rural communities. The following information is important because it meant that when conducting the analysis, we did not need to use any post sampling adjustment to ensure the accuracy of our data, except for minor cleaning of the data. 
+
+After conducting the analysis, we realized that our assumed cause for the rise of Bloc Quebecois voting and seats was not due to a focus on the protection of Quebecois culture; yet we still continued to see a rise in the electorate’s support for the Bloc Quebecois culture. 
+
+Simulating the data and analyzing the results indicated that the trends from the 2019 election will continue based upon the survey results.  
+
+Through various figures and tables, such as showcasing voting intention based upon the respondent’s view on the importance of protecting Quebecois culture, our hypothesis — Quebecois Protectionism is a predictor for how likely they are to vote for the Bloc Quebecois — was repeatedly proven false. 
+
+The next step for our analysis was to identify other explanations for the reasons Bloc Quebecois won so many votes. A majority of the electoral ridings lost to the Bloc Quebecois were in rural regions. To understand the ideology behind each respondent’s vote in those regions, we closely examined the rural region by creating subsets of the data. Even after examining the subset of rural data, we came to the conclusion that regional typology does not have an effect on the issue respondents find important. 
+
+The information we found is important because it helps the Liberal party be prepared for the next election. The survey helps the Liberal Party identify key issues that can help them win ridings that were previously lost in the federal election. Simulating the survey results allows us to get familiar with the tools used for the analysis, that way we can identify changes before we work with real results. 
+
+There were also weaknesses in the survey. Because the survey is expected to be sent out only a year after the previous federal election, many people’s opinions can change between now and the next election. This makes our results less useful in determining changes to the Liberal Party. At the same time, conducting the survey earlier may also function as a positive because it gives the Liberal Party more time to act on issues highlighted in the survey. Another potential weakness is that our connection to the Liberal Party may result in bias. Because we disclose that we are connected with the Liberal party, many respondents’ responses may be biased when reacting and responding to the survey, resulting in inaccurate results. 
+
+After successfully surveying the province of Quebec, there are many other areas of future work for the Liberal Party.  In particular, the Liberal Party could target other provinces and determine why the Liberals lost seats. When sampling other provinces, the survey would change dramatically as the Liberal Party would have to ask questions for specific provinces.  Another potential area for future work could be to target ridings rather than provinces. This may provide more meaningful answers but may also bring a multitude of other factors to consider because we are dealing with a different scale. 
+
+# Introduction 
+
+In the 2019 Federal Election, the Liberal Party lost a total of 9 seats — 8 of which were lost to the Bloc Quebecois party. This raised the interesting question — why did the Liberal Party lose 8 of 9 seats to the Bloc Quebecois party? 
+ 
+Working with the Liberal Party, we decided to investigate this issue further by focusing on the general province of Quebec to determine why so many seats were lost to the Bloc Quebecois party. By randomly sampling individuals that reside in Quebec through SMS text messaging and mail surveys, we would gather data on the province of Quebec. The data we collected would provide important information about the participants view such as who they are voting for in the next election, areas for improvement, how much they feel Quebec identity is at threat, etc. without sacrificing the respondent’s privacy. 
+
+We began by simulating the results of our survey and analyzing the data to find important information from the data. Using the simulated data, we created many tables and figures to explain why the Liberal Party lost so many seats to the Bloc Quebecois party. Our hypothesis was that Quebecers find protecting their culture a major predictor for how likely they are to vote for the Bloc Quebecois. After conducting the analysis, we were not able to prove that our hypothesis was true. From that point on, we tried to find additional reasons as to why the Liberal Party lost so many seats to the Bloc Quebecois. We believed that the region of the respondent would also play a big part in deciding which party to vote for, but using the simulated results, we found that all regions vote similarly.  
+
+The results we found are important because despite there being no strong relationship found this helps the Liberal party narrow down possible explanations and prepare for the next election. Also, since we are surveying individuals in Quebec only a year after the last federal election, the Liberal Party can have a head start in changing its platform to cater to the lost seats in Quebec. 
+
+In this report, we will begin by discussing the methodology of our survey. Then we will discuss the results of the survey, followed by a discussion of the results. And lastly, we will include an appendix and references from our analysis.  
+
+# Survey Methodology 
+
+In this report, we use survey sampling to collect information on the province of Quebec. Below, I will define the target population, population frame, and sampled population for our survey: 
+
+-	Population — all voting residents in the province of Quebec that are eligible to vote
+-	Frame — all voting residents of Quebec that have a cellphone number in the province of Quebec, or those who have a permanent address in the province of Quebec 
+-	Sampled population — all voting residents of Quebec that complete the survey that they received or those who completed the mailed survey and sent it back 
+
+The sampling method used in this case is simple random sampling without replacement (SRSWOR). Because we want to pick a part of the population that best represents Quebec, we believe that SRSWOR’s ability to randomly pick individuals from Quebec without any bias is really useful. Randomly selecting from a large population from Quebec will assure that the sample is representative of the population. Also, SRSWOR is relatively simple to conduct, which means we don’t have to spend too much money on the execution of the survey. SRSWOR is also helpful in our case because the sample mean is an unbiased estimator for the population mean— this fact can be helpful when analyzing our results. 
+
+There are two different ways that we will be reaching the desired respondents of our survey — the first is through SMS texting and the second by mail surveys. This is so that we there is less bias in those who respond based on the two methods in which an individual can respond. Since we would like to get a sample representative of the entire province of Quebec, we decided the best way to do that would be by random sampling the entire province. SMS texting is the most convenient way to reach most of our respondents, but we also wanted to reach a large portion of the population that is not tech-savvy, or do not have a cell phone, so we also creating a mail survey with identical questions. In order to ensure that our survey is not categorized as spam, we are going to disclose that we are associated with the Liberal Party, making it more likely that our respondents will fill out the survey. 60% of our survey will be distributed through SMS text and the other 40% will be distributed through mail. 
+
+As we designed the survey, we were aware of the fact that distributing 60% of our survey through SMS text and the other 40% through mail would result in bias, but we also realized that there was a trade-off between cost and bias. Because mail surveys were much more expensive, we decided to strike a balance between the bias of our survey and the cost of our survey and do a 60-40 split. Ideally, we would have liked to distribute 50% of the survey through SMS texting and the other 50% through mail to reduce bias, but this would also significantly increase our cost. 
+
+We set our target for number of responses at 20,000. This is based upon a goal of a 99% confidence interval and 1% margin of error, which was applied to the provincial population of Quebec, which currently stands at 8.485 million (Statistics Canada 2020). Using these in a standard sample size calculation gives a target of 16,545. This was done using Qualtrics services (Qualtrics 2020). In order to give the project more wiggle room in case our response rate drops below our goal or multiple mail in surveys are filled out incorrectly we rounded up that figure to 20,000. 
+
+In order to ensure that our survey has at least 20,000 respondents, we targetted a 20% response rate. This means we plan to administer 100,000 surveys — 60,000 through SMS text and 40,000 through mail. Based upon our short survey, multiple methods of response and respect for the respondent’s privacy, we believe we can hit our target 20% response rate. 
+
+Based on contemporary services, we expect to spend a total of $36,800 on 40,000 mail surveys. With each survey costing approximately $0.92 (Canada Post 2020), multiplied by the amount of mail surveys we plan to send, 40 000, we arrive at a cost of $36,800. Based on Simple Texting, a mass texting service, we plan to spend a total of $750 on SMS text surveys. Since 50,000 surveys cost $625 and we would like to send out 60,000 surveys, we will spend a total of $625*1.2=$750 on SMS text surveys (Simple Texting 2020). This results in a combined cost of $37,550 for administering the survey. To incentivize respondents, we are also including prizes for completing the survey, and we estimate that to cost approximately $1,250, bringing us to a total estimate of $38,800. 
+
+When arriving at an estimate of $38,800, we were cognizant of the fact that we are employed by the Liberty Party of Canada — the oldest federal party in Canada —making it more likely for our survey to be funded.  When arriving at the estimate of $38,800, we also decided to cut costs by reducing the amount of mail surveys by 10,000 in order to cut costs.  
+  
+Despite the fact that we are sending out 100,00 surveys, we are not expecting a total of 100,000 respondents. When deciding to send out 100,000 surveys we were aware that many people will choose not to respond, and we decided to aim for a 20% response rate. To get as many respondents as possible, we shortened our survey, created two different ways to respond to the survey and also respect the respondent’s privacy when asking questions. The designed survey does not ask about any overtly private/sensitive information and when designing the survey, we included as much information as possible in the description of the survey to inform the respondent what the purpose of the survey is, how we are going to use the respondent’s data, and how we are going respect their privacy. 
+
+Even though we have tried to get as many respondents as possible, we are still expecting nonresponses. In preparation for the inevitable nonresponses, we decided to send out 100,000 surveys, hoping to meet our target response rate of 20% and meet our goal of 20,000 respondents. In order to prevent nonresponses, we have incentivized our respondents with a chance to win a prize if they respond to the survey. We expect that nonresponses will be more common in some groups (e.g. older population, rural areas, etc.) and this can negatively affect our survey because it causes a higher variance in the response. A high variance is something that we are trying to prevent; the use of mail surveys aim to prevent nonresponses in those groups, therefore reducing variance. 
+
+# Results
+
+The results of the survey show that the sample was quite close to the demographics of the Quebec population. Based upon the data collected by Stats Canada in the 2016 Federal Census (Stats Canada 2016). Below in Table 0, is an example of a couple responses received. These responses included information on age, gender, location (which has been simplified into the type of region), how they voted in the previous election, how they plan to vote in the upcoming election, where they think the current government could improve, how important it is to them that Quebecois culture is protected, and whether they feel Quebecois culture is under threat. 
+
+## Table 0 
+  
+```{r, tidy =FALSE, echo =FALSE, warning= FALSE}
+head(Quebec_survey_data) #Give few of first 10 rows of Data 
+```
+  
+Looking at Table 1, which will follow below, we can see that the general percentage of respondents in our different age categories are within 1 percentage point of the Quebec population statistics (Statistics Canada 2016). Examining further, we can see that there does not appear to be any skewing in the data based on gender and we have reached all ages no matter their gender. 
+
+## Table 1  
+```{r, tidy =FALSE, echo =FALSE, warning= FALSE}
+table1 <- Quebec_survey_data %>%  #Generate a percentage table of respondants by age and gender
+  tabyl(Age, Gender) %>% #use tabyl to generate most of this 
+  adorn_percentages("col") %>% #tell it to display percentages
+  adorn_pct_formatting(digits = 1) %>% 
+  adorn_ns() %>% #Add back in the raw counts 
+  adorn_title(placement = "combined", col_name = "Gender", row_name = "Age") %>%
+  knitr::kable() #Adjust how it is displayed 
+table1 
+```
+  
+This can also be visually displayed using Figure 1. In Figure 1, we we can see the overall age breakdown and how it roughly matches the growing percentages we would expect based on our age ranges. 
+  
+## Figure 1
+```{r, tidy =FALSE, echo =FALSE, warning= FALSE}
+Figure1 <- Quebec_survey_data %>% #Create an overall view of Age of respondents 
+  ggplot(aes(Age)) +
+  geom_bar() +
+  labs(title = "Respondants by Age Category", y = "Number of Respondants", x = "Age Category")+
+  theme_minimal()  #Adjust how it is displayed 
+  
+Figure1 + geom_bar(fill = "steelblue")
+```
+  
+Moving on to Table 2, which follows below, we can see that the general percentage of respondents of different genders also follows Quebec population values (Statistics Canada 2016). Also, the previously stated finding that Gender does not affect our response rate among those of different ages is also true in reverse. 
+  
+## Table 2
+```{r, tidy =FALSE, echo =FALSE, warning= FALSE}
+table2 <- Quebec_survey_data %>%  #Generate a percentage table of respondants by Gender and age
+  tabyl(Gender, Age) %>% #use tabyl to generate most of this 
+  adorn_percentages("col") %>% #tell it to display percentages
+  adorn_pct_formatting(digits = 1) %>% 
+  adorn_ns() %>% #Add back in the raw counts 
+  adorn_title(placement = "combined", col_name = "Age", row_name = "Gender") %>%
+  knitr::kable() #Adjust how it is displayed 
+table2 
+```
+
+For a view of the overall gender split, please see Figure 2 below: 
+  
+## Figure 2
+```{r, tidy =FALSE, echo =FALSE, warning= FALSE}
+Figure2 <- Quebec_survey_data %>% #Create a overall view of Gender of Respondants 
+  ggplot(aes(Gender)) +
+  geom_bar() +
+  labs(title = "Respondants by Gender", y = "Number of Respondants", x = "Gender")+
+  theme_minimal()  #Adjust how it is displayed 
+  
+Figure2 + geom_bar(fill = "steelblue")
+```
+
+Finally, when checking to make sure that our use of a 2-pronged method for collecting surveys was successful in reaching Quebecers who lived in smaller or rural communities, we found that it was a success. Looking at Figure 3 the percentage of each region is very close to best population estimates (Dufferin 2019). With the urban region being about 59.2% of the population, rural region being 32.3%, and region of small town including 8.5%. The delineation of these categories are as follows — Urban was 100,000 or more people in a municipality. Small Town was 30,000 to 99,999. And Rural was 29,999 and less. 
+  
+## Figure 3
+```{r, tidy =FALSE, echo =FALSE, warning= FALSE}
+Figure3 <- Quebec_survey_data %>% 
+  ggplot(aes(Region)) +
+  geom_bar() +
+  labs(title = "Respondants by Region", y = "Number of Respondants", x = "Region Type")+
+  theme_light()  #Adjust how it is displayed 
+  
+Figure3 + geom_bar(fill = "steelblue")
+```
+
+Knowing that the demographics of the responses received was so close to that of the population values indicated that this analysis did not need any post sampling adjustment to ensure accuracy. The only thing that needed to be done was the survey data needed to be cleaned so that respondents aged less than 17 were removed from the analysis analysis as they were not old enough to participate in the voting process. 
+
+In our analysis, we found that our assumed cause for the rise of Bloc Quebecois voting and seats held may not have been due to what we initially though — a focus on the protection of Quebecois Culture. However, the general upward trend in how much of the electorate is supporting the Bloc Quebecois continues to rise. This is evident in Figure 4 below:
+
+## Figure 4
+```{r, tidy =FALSE, echo =FALSE, warning= FALSE}
+Quebec_survey_data_clean  <- subset(Quebec_survey_data, Age != "17 years old or younger")
+Projected_vote_difference <- Quebec_survey_data_clean %>% 
+  select(Last_election, Upcoming_election, Response_ID)
+#Give both Upcoming Vote and Last Vote the same values so that they can be more easily compared 
+Projected_vote_difference[Projected_vote_difference=="I did not vote in the last federal election" | Projected_vote_difference== "I do not plan to vote"] <- "No Vote"
+Projected_vote_difference[Projected_vote_difference=="I voted for the Liberal party" | Projected_vote_difference == "Liberal Party"] <- "Liberal"
+Projected_vote_difference[Projected_vote_difference=="I voted for the Conservative party" | Projected_vote_difference == "Conservative Party"] <- "Conservative" 
+Projected_vote_difference[Projected_vote_difference=="I voted for the NDP party" | Projected_vote_difference == "NDP Party"] <- "NDP"
+Projected_vote_difference[Projected_vote_difference=="I voted for the Green party" | Projected_vote_difference == "Green Party"] <- "Green"
+Projected_vote_difference[Projected_vote_difference=="I voted for the Bloc Quebecois" | Projected_vote_difference == "Bloc Quebecois"] <- "BQ"
+Projected_vote_difference[Projected_vote_difference=="I voted for a party not listed above" | Projected_vote_difference=="A party not listed above"] <- "Other"
+#Gather values in to one collum for a bar graph 
+Projected_vote_difference_Plot  <- Projected_vote_difference %>% 
+  gather("Stat", "Value", -Response_ID) %>% 
+  group_by(Stat) %>% 
+  count(Value)
+  
+Figure4 <- Projected_vote_difference_Plot %>% #Generate the graph 
+  ggplot(aes(x= Value, y=n, fill = Stat))+
+  geom_col(position = "dodge")+
+  labs(title = "Voting Intention Compared to Previous Votes Cast", y = "Number of Respondants", x = "How they Vote", fill="")+
+  theme_light() #Adjust how it is displayed 
+Figure4
+```
+
+The trends following the 2019 election seem to be projected to continue based upon early voter intentions (Elections Canada 2019). Although the trends seem to have slowed by half. Such that the Bloc Quebecois are expected to gain only half the percentage uptick they saw in the last election and this is true for all parties. 
+
+As stated before, the expected  hypothesis of this analysis —  Quebecers find protecting their culture is a predicter for how likely they are to vote for the Bloc Quebecois — was proven false. Looking at Figure 5, we can see that across our measure for importance, the general rate at which respondents chose the party to vote for did not change drastically. In fact, it stayed almost identical. 
+
+## Figure 5
+```{r, tidy =FALSE, echo =FALSE, warning= FALSE}
+total_votes_by_culture <- Quebec_survey_data_clean %>%  #generate a new data set that can be used fo ggplot
+  select(Upcoming_election, Protect_Culture) %>%#select the collumns we wish to use
+  group_by(Protect_Culture) %>% #group all rows by how important protecting culture was to them
+  count(Upcoming_election) #count each parties total intended votes based upon the grouping of Protecting Culture 
+ 
+Figure5 <- total_votes_by_culture %>% #create a plot that can visualize the Table 1
+  ggplot(aes(Protect_Culture, n, fill = Upcoming_election)) +
+  geom_bar(stat = "identity") + #set it to a bar graph
+  labs(title = "Voting Intentions based upon Respondant's view on Importance of Protecting Quebecois Culture", y = "Number of Respondants", x = "Rated Importance of Protecting Quebecois Culture", fill="Voting Intention")+
+  theme_light() +
+        theme(text=element_text(size=8)) #Adjust how it is displayed 
+Figure5
+```
+
+This is made even clearer by looking at Table 3: 
+  
+## Table 3
+```{r, tidy =FALSE, echo =FALSE, warning= FALSE}
+table3 <- Quebec_survey_data_clean %>%  #Generate a percentage table of voting percentages based on views on protecting culture
+  tabyl(Upcoming_election, Protect_Culture) %>% #use tabyl to generate most of this 
+  adorn_percentages("col") %>% #tell it to display percentages
+  adorn_pct_formatting(digits = 1) %>% 
+  adorn_ns() %>% #Add back in the raw counts 
+  adorn_title(placement = "combined", col_name = "Importance of Protecting Quebecois Culture", row_name = "Voting Intention") %>%
+  knitr::kable() #Adjust how it is displayed 
+table3 
+```
+
+So, the analysis moved on to the next opportunity for important information. Since the assumed case of protecting Quebecois culture turned out to be incorrect the next logical step was to check for other explanations. 
+
+We noted that a majority of the Electoral ridings lost by the Liberal Party to the Bloc Quebecois were in rural regions. We needed to better understand what voters want in those regions, and how the Bloc Quebecois may be outcompeting the Liberal Party. To best find this out with the current data, the Regional data was split in to data subsets so that each could be evaluated by what respondent’s said was the most important issue with the Liberal Government. What we found after grouping results using a text to data codes software was astounding. 
+
+Looking at Figure 6, it appears that the regional typology does not have any effect on what issue respondents find important. While this goes against every bit of political science, it is what the data is showing. Surprisingly, there appears to be little to no difference between the different regions: 
+
+## Figure 6
+```{r, tidy =FALSE, echo =FALSE, warning= FALSE}
+ruraldata <- subset(Quebec_survey_data_clean, Region== 'Rural') #Pull out subset of just Rural data 
+towndata <- subset(Quebec_survey_data_clean, Region== 'Town') #Pull out subset of just Town data 
+urbandata <- subset(Quebec_survey_data_clean, Region== 'Urban') #Pull out subset of just Urban data 
+p1 <- ggplot(data=ruraldata, aes(x=Area_for_Improvement)) + #Use Rural subset to display the Most important issues in that area
+  geom_histogram(stat='count', fill = "yellow") +
+  labs(title = "Respondant's Most Important Area of Improvement (Rural)", y = "Total Responses", x = "Most Important Area of Improvement")+
+  theme_light()  #Adjust how it is displayed 
+p2 <- ggplot(data=towndata, aes(x=Area_for_Improvement)) + #Use Town subset to display the Most important issues in that area
+  geom_histogram(stat='count', fill = "red")+
+  labs(title = "Respondant's Most Important Area of Improvement (Town)", y = "Total Responses", x = "Most Important Area of Improvement")+
+  theme_light()  #Adjust how it is displayed 
+p3 <- ggplot(data=urbandata, aes(x=Area_for_Improvement)) + #Use Urban subset to display the Most important issues in that area
+  geom_histogram(stat='count', fill = "steelblue")+
+  labs(title = "Respondant's Most Important Area of Improvement (Urban)", y = "Total Responses", x = "Most Important Area of Improvement")+
+  theme_light()  #Adjust how it is displayed d
+grid.arrange(p1,p2,p3,nrow = 3) #Combine all graphs in to one easily usable figure
+```
+
+
+# Discussion
+
+In conclusion, the findings of this survey analysis are inconclusive. All avenues taken to find possible explanations for the rise in Bloc Quebecois voting were fruitless. It was almost as if all of our variables were independently simulated and so there was no relationship between any of them…..
+
+However, what this does is eliminate possible avenues of explanation. We have found that both regionality, Urban/Rural, as well as the protectionism some Quebecers feel are not influencing them to be more likely to vote for the Bloc Quebecois. 
+
+Some weaknesses of the study that could have led to this strange finding are as follows: 
+
+Disclosing this studies connection to the Liberal Party while reducing the number of people who saw the survey as spam may have influenced the results in some way. As not only did we have voluntary bias as only those enticed by our prices, or willing to participate for free filled out the survey, but now only those who would willing fill in the survey for the Liberal Party participated. This could mean that similar to online reviews, we only reached those who were strongly in favor of or strongly against the party (Beaton 2018). This could have led to a skewing of the data in some interesting ways. 
+
+Furthermore, all these responses are being taken well in advance of elections before campaigning has begone. This was done to try to inform the Liberal campaign in Quebec. But it will add inaccuracy as many people may change their mind before elections are called. It also means that individuals may not be spending a lot of time right now focusing on politics and looking at the parties. This reduced focus could lead to a current state of opinions that are more volatile as campaigning and the increase of political focus will cause more movement. 
+
+All in all, the findings of this paper mean that further study must be done on other possible explanatory variables. While we have ruled out Cultural Protectionism and Regionality there are many more factors that could be the cause of the uptick in Quebecers voting for the Bloc Quebecois. A recommendation that we would make is a smaller more anecdotal qualitative study of specific voters in the ridings that were lost. Perhaps in person interviews on the decision making they used in 2019. This could lead to much richer data, that while not being generalizable, could give us a glimpse in to what could be the primary explanatory variable in this trend towards the Bloc Quebecois. 
+
+
+# References 
+## Research
+- Angus Reid Institute. (2016). What makes us Canadian? A study of values, beliefs, priorities and identity. Retrieved from http://angusreid.org/canada-values/
+- Angus Reid Institute. (2018). Quebecers were more likely to say the province was on the wrong track than the right one before Oct. 1. Retrieved from http://angusreid.org/quebec-election-2018-analysis
+- Beaton, C. (2018, June 14). Why You Can't Really Trust Negative Online Reviews. Retrieved from https://www.nytimes.com/2018/06/13/smarter-living/trust-negative-product-reviews.html
+- Canada Post. (2020). Buy stamps, postage meters and indicia: Business. Retrieved from https://www.canadapost.ca/cpc/en/business/postal-services/stamps-meters.page
+- Duffin, P. B., & 29, A. (2019, April 29). Population distribution of Quebec, by rural/urban type 2016. Retrieved from https://www.statista.com/statistics/608694/population-distribution-of-quebec-by-rural-urban-type/#:~:text=This statistic shows the population,in large urban population centers.
+- Elections Canada. (2019). General Election Results Raw Data. Retrieved from https://www.elections.ca/content.aspx?section=res&dir=rep/off/43gedata&document=index&lang=e
+- Qualtrics. (2020, September 09). How to Determine the Correct Survey Sample Size. Retrieved from https://www.qualtrics.com/experience-management/research/determine-sample-size/
+- Simple Texting. (2020, June 03). SMS Marketing Pricing: Text Marketing Plans: SimpleTexting. Retrieved from https://simpletexting.com/pricing/
+- Statistics Canada. (2019, August 09). Census Profile, 2016 Census Quebec [Province] and Canada [Country]. Retrieved from https://www12.statcan.gc.ca/census-recensement/2016/dp-pd/prof/details/page.cfm?Lang=E&Geo1=PR&Code1=24&Geo2=PR&Code2=01&Data=Count&SearchText=24&SearchType=Begins&SearchPR=01&B1=All&Custom=&TABID=3
+
+
+## Coding
+- Sam Firke (2020). janitor: Simple Tools for Examining and Cleaning Dirty Data. R package version 2.0.1.
+https://CRAN.R-project.org/package=janitor
+- JJ Allaire and Yihui Xie and Jonathan McPherson and Javier Luraschi and Kevin Ushey and Aron Atkins and Hadley Wickham and Joe Cheng
+and Winston Chang and Richard Iannone (2020). rmarkdown: Dynamic Documents for R. R package version 2.3. URL
+https://rmarkdown.rstudio.com.
+- Yihui Xie and J.J. Allaire and Garrett Grolemund (2018). R Markdown: The Definitive Guide. Chapman and Hall/CRC. ISBN 9781138359338.
+URL https://bookdown.org/yihui/rmarkdown.
+- R Core Team (2020). R: A language and environment for statistical computing. R Foundation for Statistical Computing, Vienna,
+Austria. URL https://www.R-project.org/.
+- Wickham et al., (2019). Welcome to the tidyverse. Journal of Open Source Software, 4(43), 1686, https://doi.org/10.21105/joss.01686
+- Hadley Wickham, Romain François, Lionel Henry and Kirill Müller (2020). dplyr: A Grammar of Data Manipulation. R package version
+1.0.2. https://CRAN.R-project.org/package=dplyr
+- Baptiste Auguie (2017). gridExtra: Miscellaneous Functions for "Grid" Graphics. R package version 2.3.
+https://CRAN.R-project.org/package=gridExtra
+
+
+# Appendices 
+
+## Git Repository 
+The link to the Git Repository is: https://github.com/STA304-PS2/Quebec-Elections-The-Effect-of-Quebecois-Protectionism
+
+## Code 
+
+Below you will also find the R code used in this analysis: 
+
+#### Preamble — setting up libraries and setting up the variable 'Quebec_survey_data' which will be used in Table 0
+
+```{r, fig.show='hide', results = 'hide', warning= FALSE}
+library(tidyverse)
+library(dplyr)
+library(janitor)
+library(gridExtra)
+```
+
+```{r, fig.show='hide', results = 'hide', warning= FALSE}
+set.seed(624)
+##The Sampling Method##
+Quebec_survey_data <- tibble( 
+  Response_ID = (c(1:20000)),
+  Gender = sample(x = c("Male", "Female", "Non-Binary", "Other", "Prefer not to say"), 
+                  size = 20000, replace = TRUE, prob = c(0.48, 0.50, 
+                                                         0.01, 0.001, 0.009)), 
+  #Based on Stats Can Census 2016 (Statistics Canada 2019)
+  Age = sample(x = c("18 - 29 years old", "30 - 44 years old",
+                     "45 - 59 years old", "60+ years old", "17 years old or younger"), 
+               size = 20000, replace = TRUE, prob = c(0.170,
+                                                      0.192, 0.217, 0.252, 0.169)), 
+  #Based on Stats Can Census 2016 (Statistics Canada 2019)
+  Region = sample(x = c("Urban", "Town", "Rural"), 
+                  size = 20000, replace = TRUE, prob = c(0.592, 0.086, 0.322)), 
+  #Based on Duffin's 2016 surveys (Duffin 2019)
+  Last_election = sample(x = c("I did not vote in the last
+                               federal election", "I voted 
+                               for the Liberal party", "I 
+                               voted for the Conservative
+                               party", "I voted for the NDP
+                               party", "I voted for the Green
+                               party", "I voted for the Bloc 
+                               Quebecois", "I voted for a party 
+                               not listed above"), size = 20000,
+                         replace = TRUE, prob = c(0.327, 0.231,
+                                                  0.108, 0.073,
+                                                  0.030, 0.218,
+                                                  0.013)), 
+  #Based on Elections Canada results in 2019 (Elections Canada 2019)
+  Upcoming_election = sample(x = c("I do not plan to vote", "Liberal
+                                   Party", "Conservative Party",
+                                   "NDP Party", "Green Party", 
+                                   "Bloc Quebecois", "A party not listed above"),
+                             size = 20000, replace = TRUE, prob = 
+                               c(0.327, 0.23, 0.11, 0.024, 0.038,
+                                 0.26, 0.011)),
+  #Took the difference in percentage of votes each party got from 
+  #2015-2019 in  Quebec. Divided that difference by 2 making the assumption 
+  #that the extreme trends would slow and assumed the same level of voter 
+  #participation (Elections Canada 2019)
+  Area_for_Improvement = sample(x = c("Quebec Independenc", "Immigration",
+                                      "Education", "Health Care",
+                                      "Environment", "Other"), size 
+                                = 20000, replace = TRUE, prob = 
+                                  c(0.15,0.15,0.1,0.3,0.15,0.15)),
+  #The probabilities are more difficult to simmulate for this variable.
+  #However based upon the finding of Angus Reid Institute's Survey these
+  #are some of the stand out categories. Also the rough distribution found 
+  #was a large focus on Health care with fairly similar rate of interest in
+  #other issues (Angus Reid Institute 2018)
+  Protect_Culture = sample(x = c(1:5), size = 20000, replace = TRUE, 
+                           prob = c(0.1, 0.2, 0.3, 0.2, 0.2)),
+  #Based upon the the authors' perception that most in quebec belief 
+  #that some level of protection is needed, and the continued existance
+  #of succession movements where 35% of Angus Reid Institute's survery 
+  #respondants favored Quebec Sovereignty  (Angus Reid Institute 2018)
+  Identity_Under_Threat = sample(x = c("Yes, Quebecois identity is under
+                                       threat.", "No, it is a fictional 
+                                       issue.", "There are some threats 
+                                       but they are exaggerated.", "Don't
+                                       Know"), size = 20000, replace = 
+                                   TRUE, prob = c(0.4,0.3,0.25,0.05))
+  #Based upon the response to Angus Reid Institute's survey on Quebec 
+  #Sovereignty, assuming a slightly higher rate would beleive that 
+  #there is a credible threat than those seeking Independence, and 
+  #that there would be a split among those not seeking independence
+  #on how they respond between Fictional issue and exagerated  (Angus Reid Institute 2016)
+)
+```
+
+#### Table 0 
+  
+```{r, fig.show='hide', results = 'hide', warning= FALSE}
+head(Quebec_survey_data) #Give few of first 10 rows of Data 
+```
+  
+
+#### Table 1  
+
+```{r, fig.show='hide', results = 'hide', warning= FALSE}
+table1 <- Quebec_survey_data %>%  #Generate a percentage table of
+  #respondants by age and gender
+  tabyl(Age, Gender) %>% #use tabyl to generate most of this 
+  adorn_percentages("col") %>% #tell it to display percentages
+  adorn_pct_formatting(digits = 1) %>% 
+  adorn_ns() %>% #Add back in the raw counts 
+  adorn_title(placement = "combined", col_name = "Gender", row_name = "Age") %>%
+  knitr::kable() #Adjust how it is displayed 
+table1 
+```
+
+#### Figure 1
+```{r, fig.show='hide', results = 'hide', warning= FALSE}
+Figure1 <- Quebec_survey_data %>% #Create an overall view of Age of respondents 
+  ggplot(aes(Age)) +
+  geom_bar() +
+  labs(title = "Respondants by Age Category", y = "Number of Respondants",
+       x = "Age Category")+
+  theme_minimal()  #Adjust how it is displayed 
+  
+Figure1 + geom_bar(fill = "steelblue")
+```
+  
+
+#### Table 2
+```{r, fig.show='hide', results = 'hide', warning= FALSE}
+table2 <- Quebec_survey_data %>%  #Generate a percentage table of 
+  #respondants by Gender and age
+  tabyl(Gender, Age) %>% #use tabyl to generate most of this 
+  adorn_percentages("col") %>% #tell it to display percentages
+  adorn_pct_formatting(digits = 1) %>% 
+  adorn_ns() %>% #Add back in the raw counts 
+  adorn_title(placement = "combined", col_name = "Age", row_name
+              = "Gender") %>%
+  knitr::kable() #Adjust how it is displayed 
+table2 
+```
+
+#### Figure 2
+```{r, fig.show='hide', results = 'hide', warning= FALSE}
+Figure2 <- Quebec_survey_data %>% #Create a overall view of Gender
+  #of Respondants 
+  ggplot(aes(Gender)) +
+  geom_bar() +
+  labs(title = "Respondants by Gender", y = "Number of Respondants", x = "Gender")+
+  theme_minimal()  #Adjust how it is displayed 
+  
+Figure2 + geom_bar(fill = "steelblue")
+```
+
+#### Figure 3
+```{r, fig.show='hide', results = 'hide', warning= FALSE}
+Figure3 <- Quebec_survey_data %>% 
+  ggplot(aes(Region)) +
+  geom_bar() +
+  labs(title = "Respondants by Region", y = "Number of Respondants", 
+       x = "Region Type")+
+  theme_light()  #Adjust how it is displayed 
+  
+Figure3 + geom_bar(fill = "steelblue")
+```
+
+
+#### Figure 4
+```{r, fig.show='hide', results = 'hide', warning= FALSE}
+Quebec_survey_data_clean  <- subset(Quebec_survey_data, Age != 
+                                      "17 years old or younger")
+Projected_vote_difference <- Quebec_survey_data_clean %>% 
+  select(Last_election, Upcoming_election, Response_ID)
+#Give both Upcoming Vote and Last Vote the same values 
+#so that they can be more easily compared 
+Projected_vote_difference[Projected_vote_difference=="I did not 
+                          vote in the last federal election" |
+                            Projected_vote_difference== "I do 
+                          not plan to vote"] <- "No Vote"
+Projected_vote_difference[Projected_vote_difference=="I voted for
+                          the Liberal party" |
+                            Projected_vote_difference == 
+                            "Liberal Party"] <- "Liberal"
+Projected_vote_difference[Projected_vote_difference=="I voted 
+                          for the Conservative party" |
+                            Projected_vote_difference == 
+                            "Conservative Party"] <- "Conservative" 
+Projected_vote_difference[Projected_vote_difference
+                          =="I voted for the NDP party" | 
+                            Projected_vote_difference == 
+                            "NDP Party"] <- "NDP"
+Projected_vote_difference[Projected_vote_difference=="I 
+                          voted for the Green party" | 
+                            Projected_vote_difference ==
+                            "Green Party"] <- "Green"
+Projected_vote_difference[Projected_vote_difference=="I 
+                          voted for the Bloc Quebecois" | 
+                            Projected_vote_difference == "Bloc Quebecois"] <- "BQ"
+Projected_vote_difference[Projected_vote_difference=="I voted 
+                          for a party not listed above" | 
+                            Projected_vote_difference=="A party not 
+                          listed above"] <- "Other"
+#Gather values in to one collum for a bar graph 
+Projected_vote_difference_Plot  <- Projected_vote_difference %>% 
+  gather("Stat", "Value", -Response_ID) %>% 
+  group_by(Stat) %>% 
+  count(Value)
+  
+Figure4 <- Projected_vote_difference_Plot %>% #Generate the graph 
+  ggplot(aes(x= Value, y=n, fill = Stat))+
+  geom_col(position = "dodge")+
+  labs(title = "Voting Intention Compared to Previous Votes 
+       Cast", y = "Number of Respondants", x = "How they Vote", fill="")+
+  theme_light() #Adjust how it is displayed 
+Figure4
+```
+
+
+#### Figure 5
+```{r, fig.show='hide', results = 'hide', warning= FALSE}
+total_votes_by_culture <- Quebec_survey_data_clean %>%  
+  #generate a new data set that can be used fo ggplot
+  select(Upcoming_election, Protect_Culture) %>%
+  #select the collumns we wish to use
+  group_by(Protect_Culture) %>% 
+  #group all rows by how important protecting culture was to them
+  count(Upcoming_election) #count each parties total
+  #intended votes based upon the grouping of Protecting Culture 
+ 
+Figure5 <- total_votes_by_culture %>% #create a plot that can visualize the Table 1
+  ggplot(aes(Protect_Culture, n, fill = Upcoming_election)) +
+  geom_bar(stat = "identity") + #set it to a bar graph
+  labs(title = "Voting Intentions based upon Respondant's 
+       view on Importance of Protecting Quebecois Culture", 
+       y = "Number of Respondants", x = "Rated Importance of 
+       Protecting Quebecois Culture", fill="Voting Intention")+
+  theme_light() +
+        theme(text=element_text(size=8)) #Adjust how it is displayed  
+Figure5
+```
+
+#### Table 3
+```{r, fig.show='hide', results = 'hide', warning= FALSE}
+table3 <- Quebec_survey_data_clean %>%  #Generate a percentage 
+  #table of voting percentages based on views on protecting culture
+  tabyl(Upcoming_election, Protect_Culture) %>% #use tabyl to
+  #generate most of this 
+  adorn_percentages("col") %>% #tell it to display percentages
+  adorn_pct_formatting(digits = 1) %>% 
+  adorn_ns() %>% #Add back in the raw counts 
+  adorn_title(placement = "combined", col_name = "Importance
+              of Protecting Quebecois Culture", row_name = 
+                "Voting Intention") %>%
+  knitr::kable() #Adjust how it is displayed 
+table3 
+```
+
+#### Figure 6
+```{r, fig.show='hide', results = 'hide', warning= FALSE}
+ruraldata <- subset(Quebec_survey_data_clean, Region== 'Rural') 
+#Pull out subset of just Rural data 
+towndata <- subset(Quebec_survey_data_clean, Region== 'Town') 
+#Pull out subset of just Town data 
+urbandata <- subset(Quebec_survey_data_clean, Region== 'Urban')
+#Pull out subset of just Urban data 
+p1 <- ggplot(data=ruraldata, aes(x=Area_for_Improvement)) + 
+  #Use Rural subset to display the Most important issues in that area
+  geom_histogram(stat='count', fill = "yellow") +
+  labs(title = "Respondant's Most Important Area of Improvement
+       (Rural)", y = "Total Responses", x = "Most Important Area of Improvement")+
+  theme_light()  #Adjust how it is displayed 
+p2 <- ggplot(data=towndata, aes(x=Area_for_Improvement)) + 
+  #Use Town subset to display the Most important issues in that area
+  geom_histogram(stat='count', fill = "red")+
+  labs(title = "Respondant's Most Important Area of Improvement 
+       (Town)", y = "Total Responses", x = "Most Important Area 
+       of Improvement")+
+  theme_light()  #Adjust how it is displayed 
+p3 <- ggplot(data=urbandata, aes(x=Area_for_Improvement)) + 
+  #Use Urban subset to display the Most important issues in that area
+  geom_histogram(stat='count', fill = "steelblue")+
+  labs(title = "Respondant's Most Important Area of Improvement
+       (Urban)", y = "Total Responses", x = "Most Important Area of Improvement")+
+  theme_light()  #Adjust how it is displayed d
+grid.arrange(p1,p2,p3,nrow = 3) #Combine all graphs in to one easily usable figure
+```
+
+
+## Survey 
+The link for the survey can be found on the following link: https://forms.gle/aKm6sXJdwCvm8vtN8 
+
+Below is a list of screenshots of the survey.
+
+The mailed version of the survey uses the same lay out. However, the questions are not seperated into two parts as they are online.  
+
+![Liberal Party Survey Part 1.1](Liberal Party Survey Part1.1.png)
+
+![Liberal Party Survey Part 1.2](Liberal Party Survey Part1.2.png)
+
+![Liberal Party Survey Part 1.3](Liberal Party Survey Part1.3.png)
+
+![Liberal Party Survey Part 1.4](Liberal Party Survey Part1.4.png)
+
+![Liberal Party Survey Part 2.1](Liberal Party Survey Part2.1.png)
+
+![Liberal Party Survey Part 2.2](Liberal Party Survey Part2.2.png)
