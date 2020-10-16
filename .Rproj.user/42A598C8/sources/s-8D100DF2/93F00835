@@ -5,15 +5,15 @@
     "dirty" : false,
     "encoding" : "UTF-8",
     "folds" : "",
-    "hash" : "3985134671",
+    "hash" : "3924829006",
     "id" : "93F00835",
-    "lastKnownWriteTime" : 1602862085,
-    "last_content_update" : 1602862085669,
+    "lastKnownWriteTime" : 1602862522,
+    "last_content_update" : 1602862522765,
     "path" : "~/U of T/2020 Fall/STA304/Canadian-Women-s-Decision-to-Change-Their-Last-Name-2017/Scripts/gss_cleaning-1.R",
     "project_path" : "Scripts/gss_cleaning-1.R",
     "properties" : {
-        "cursorPosition" : "348,0",
-        "scrollLine" : "321"
+        "cursorPosition" : "357,0",
+        "scrollLine" : "330"
     },
     "read_only" : false,
     "read_only_alternatives" : [

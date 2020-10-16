@@ -345,4 +345,13 @@ gss <- gss %>%
     number_total_children_intention=="Don't" ~ as.numeric(NA)
   )) 
 
+gss <- gss %>% 
+  rowwise() %>% 
+  mutate(partner_sex = str_remove(string = partner_sex, pattern = "\\ .*")) %>% 
+  mutate(partner_sex = case_when(
+    partner_sex==0 ~ "No Partner",
+    partner_sex==1 ~ "Male",
+    partner_sex==2 ~ "Female",
+  ))
+
 write_csv(gss, "Outputs/gss.csv")
