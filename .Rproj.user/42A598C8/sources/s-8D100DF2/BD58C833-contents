@@ -32,7 +32,7 @@ gss_used <- gss_used %>%  #select all important variables
     income_family,
     occupation,
     education,
-    partner_education,
+    education,
     partner_sex,
     region,
     pop_center,
@@ -45,7 +45,32 @@ gss_prepped <- gss_used %>%
          !is.na(religion_importance), 
          !is.na(income_family), 
          !is.na(education),
+         !is.na(partner_sex),
          !is.na(region),
          !is.na(pop_center)
          )
+
+#### Adjust Variables to be more Usable ####
+
+#Create Decade of first birth, and group both types of ages 
+gss_prepped <- gss_prepped %>% 
+  mutate(decade_first_birth = 2017-age+age_at_first_birth ) %>% 
+  mutate(decade_first_birth = (as.character(cut(decade_first_birth, 
+                                breaks = c(seq(1969, 2019, by = 10), Inf),
+                                labels = seq(1960, 2010, by = 10), right = FALSE
+          ))), 
+          age_group = (as.character(cut(age, 
+                                breaks = c(seq(15, 80, by = 5), Inf),
+                                labels = seq(15, 80, by = 5), right = FALSE
+          ))),
+         age_at_first_birth_group = (as.character(cut(age_at_first_birth, 
+                                breaks = c(seq(15, 80, by = 5), Inf),
+                                labels = seq(15, 80, by = 5), right = FALSE
+         ))),)
+
+#Trying to group the education levels 
+#gss_prepped$education <- gsub("	Bachelor's degree (e.g. B.A., B.Sc., LL.B.)", "BA/College", gss_prepped$education)
+
+
+write_csv(gss, "Outputs/gss-prepared-for-analysis.csv")
 
