@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1602853995897.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "93F00835",
+    "lastKnownWriteTime" : 1602854820,
+    "last_content_update" : 1602854820040,
+    "path" : "~/U of T/2020 Fall/STA304/Canadian-Women-s-Decision-to-Change-Their-Last-Name-2017/Scripts/gss_cleaning-1.R",
+    "project_path" : "Scripts/gss_cleaning-1.R",
+    "properties" : {
+        "cursorPosition" : "11,42",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
