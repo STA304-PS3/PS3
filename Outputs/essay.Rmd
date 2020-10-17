@@ -34,7 +34,46 @@ $$
 log(\frac{p}{1-p})=\beta_0+\beta_{age}x_{age}+\beta_{inc}x_{inc}+\beta_{edu}x_{edu}+\beta_{pop}x_{pop}
 $$
 
-We use `glm` from `stats`package to fir the model to our data. We use use `as.factor()` to incorporate dummy variables for all the categorical variables: family income, education level and the type of population center. 
+We use `glm()` from `stats` package to fir the model to our data. We use `as.factor()` to incorporate dummy variables for all the categorical variables: family income, education level and the type of population center. For each categorical variable with n levels, we need n-1 dummy variables to fully study its influence on our response variable. 
+
+The dummy variables setting ups are stated in table x, y and z.
+
+```{r}
+dummy_income <- data.frame(
+  "income level" = c("greater than $125,000", "between $25,000 to $49,999", "between $50,000 to $74,999", "between $75,000 to $99,999", "less than $25,000", "between $100,000 tp $124,999"),
+  inc1 = c(1,0,0,0,0,0),
+  inc2 = c(0,1,0,0,0,0),
+  inc3 = c(0,0,1,0,0,0),
+  inc4 = c(0,0,0,1,0,0),
+  inc5 = c(0,0,0,0,1,0),
+  inc6 = c(0,0,0,0,0,0)
+)
+
+kable(dummy_income, caption = "Dummy Variable Coding Set Up for Income Levels")
+```
+
+```{r}
+dummy_edu <- data.frame(
+  "education level" = c("high school or less education", "University Graduate", "University Undergraduate", "college/trade"),
+  HS = c(1,0,0,0),
+  graduate = c(0,1,0,0),
+  under = c(0,0,1,0),
+  college = c(0,0,0,0)
+)
+
+kable(dummy_edu, caption = "Dummy Variable Coding Set Up for Education Levels")
+```
+
+```{r}
+dummy_pop <- data.frame(
+  "population center" = c("Poplation centered at PEI", "Rural areas and small population centres(non CMA/CA)", "Larger urban population centres (CMA/CA)"),
+  PEI = c(1,0,0),
+  rural = c(0,1,0),
+  urban = c(0,0,0)
+)
+
+kable(dummy_pop, caption = "Dummy Variable Coding Set Up for Population Center")
+```
 
 ```{r, include = FALSE}
 #logistic regression
@@ -57,10 +96,49 @@ my_log_res <- data.frame(
   estimate = c(0.060790, 0.161424, -0.680099, -0.449230, -0.197017, -0.872898, -0.102521, -0.779989, -0.468140, 0.276375, 0.526007)
 )
 
-kable(my_log_res, caption = "Summary of Losgistic Estimates")
+kable(my_log_res, caption = "Summary of Losgistic Estimates", 
+      label = "Data Source: GSS2017")
+```
+
+In an equation, this means 
+$$
+log(\frac{\hat{p}}{1-\hat{p}})=\hat{\beta_0}+\hat{\beta}_{age}x_{age}+\hat{\beta}_{inc_1}x_{inc_1}+\hat{\beta}_{inc_2}x_{inc_2}+\hat{\beta}_{inc_3}x_{inc_3}
+$$
+
+$$
++\hat{\beta}_{inc_4}x_{inc_4}+\hat{\beta}_{inc_5}x_{inc_5}+\hat{\beta}_{HS}x_{HS}+\hat{\beta}_{graduate}x_{graduate}+\hat{\beta}_{under}x_{under}
+$$
+
+$$
++\hat{\beta}_{PEI}x_{PEI}+\hat{\beta}_{rural}x_{rural} 
+$$
+
+Notice that we have incorporated our categorical variables using dummy variables. “inc1”, “inc2”, “inc3”, “inc4”, “inc5” represent the six income categories; "HS”,  "graduate" and "under" describe the four education levels; "PEI" and "rural" represent the three population center. 
+
+The model predicts the following result for the probability a woman has children p, rounded to three decimal places:
+
+$$
+log(\frac{\hat{p}}{1-\hat{p}})= -1.51 +0.061x_{age}+0.161x_{inc_1}-0.68x_{inc_2}-0.449x_{inc_3}
+$$
+
+$$
+-0.197x_{inc_4}-0.873x_{inc_5}-0.103x_{HS}-0.78x_{graduate}-0.468x_{under}
+$$
+
+$$
++0.276x_{PEI}+0.526x_{rural} 
+$$
+
+Note that the interpretation of the dummy variables’ prediction results is by comparing it to a certain level that is not in the equation above. A $\hat{\beta}_{HS} = -0.103$ does not mean the coefficient for a high school level education is -0.103. It represents the difference of influence (on childbirth decision) between a woman who has a college level of education and a high school level of education. -0.103  indicates that a woman who has a high school degree or below is less likely to have children than a woman who has a college degree. 
+
+```{r}
+summary(my_logit_dd)
 ```
 
 ## Discussion
+
+
+
 
 ## References
 
