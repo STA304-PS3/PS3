@@ -6,8 +6,9 @@ output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
-library(rstanarm)
+knitr::opts_chunk$set(echo = FALSE)
+library(dplyr)
+library(knitr)
 ```
 
 ## Abstract
@@ -15,27 +16,48 @@ library(rstanarm)
 ## Introduction
 
 ## Data
+```{r}
+#read data from outputs
+my_data <- read.csv("gss-prepared-for-analysis.csv")
+```
 
 ## Model
 
-The model that we are using is multilinear regression. We want to estimate the preference towards the number of children of women across Canada(change this), using a sample obtained from the GSS data set. Due to the nature of GSS, the sample represents the population well enough to skip post-stratification. We use multilevel regression to predict the number of children a woman will have based on our variables of interest using `function` from `package.` 
+We are interested in how variables such as age, family income, education level, and population center affect a woman’s decision to have children. Due to the large sample size and the nature of GSS, the sample represents the population well. The model that we are using is logistic regression, it works well for our response variable, which is a categorical variable, and it incorporates both numerical and categorical explanatory variables. 
 
+Logistic regression estimates $\beta_0...\beta_k$ in the following equation:
+$$
+log(\frac{p}{1-p})=\beta_0+\beta_1x_1+...+\beta_kx_k
+$$
+In our case, it estimates $\beta_{age},\beta_{inc},\beta_{edu},\beta_{pop}$ in:
+$$
+log(\frac{p}{1-p})=\beta_0+\beta_{age}x_{age}+\beta_{inc}x_{inc}+\beta_{edu}x_{edu}+\beta_{pop}x_{pop}
+$$
+
+We use `glm` from `stats`package to fir the model to our data. We use use `as.factor()` to incorporate dummy variables for all the categorical variables: family income, education level and the type of population center. 
+
+```{r, include = FALSE}
+#logistic regression
+my_logit_dd <- glm(
+  child ~ age + as.factor(income_family) + as.factor(education_level) 
+  + as.factor(pop_center),
+  data = my_data, family = "binomial"
+)
+
+summary(my_logit_dd)
+```
 
 ## Results
 
-```{r}
-#load prepared data
-my_data <- read.csv("gss-prepared-for-analysis .csv")
-```
+Table x summaries our model results:
 
 ```{r}
-#multilevel regression
-#This does now work, need to look into a a binomial variable.
-fit1 <- stan_glmer(
-  total_children ~ (1 | age) + (1 | age_at_first_birth) + (1 | education) + (1 | income_family),
-  family = binomial(link = "logit"),
-  data = my_data
+my_log_res <- data.frame(
+  variable = c("age", "income greater than $125,000", "income between $25,000 to $49,999", "income between $50,000 to $74,999", "income between $75,000 to $99,999", "income less than $25,000", "high school or less education", "University Graduate", "University Undergraduate","Poplation centered at PEI", "Rural areas and small population centres(non CMA/CA)"),
+  estimate = c(0.060790, 0.161424, -0.680099, -0.449230, -0.197017, -0.872898, -0.102521, -0.779989, -0.468140, 0.276375, 0.526007)
 )
+
+kable(my_log_res, caption = "Summary of Losgistic Estimates")
 ```
 
 ## Discussion
