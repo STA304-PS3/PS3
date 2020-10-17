@@ -4,7 +4,7 @@
 # of Canadian women's decision making on the number of children they wish to have. This will be done by
 # creating a subset of the total population that we neeed (women who filled out all the variables of interest)
 # and by selecting and transforming all of the data in to more useful variables.
-# Authors: Ben Draskovic
+# Authors: Arjun Dhatt, Benjamin Draskovic, Yiqu Ding, Gantavya Gupta
 # Date: 16 October 2020
 # License: MIT
 
@@ -52,6 +52,12 @@ gss_prepped <- gss_used %>%
          )
 
 #### Adjust Variables to be more Usable ####
+
+#Change total children in to a dummy yes-no variable for analysis. Do they have children? 
+gss_prepped <- gss_prepped %>% 
+  mutate(
+    child = ifelse(total_children==0, 0, 1)
+  )
 
 #Create Decade of first birth, and group both types of ages 
 gss_prepped <- gss_prepped %>% 
