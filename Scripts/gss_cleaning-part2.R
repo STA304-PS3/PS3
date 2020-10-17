@@ -13,6 +13,7 @@
 #### Workspace Set Up ####
 library(tidyverse)
 library(janitor)
+library(dplyr)
 
 
 #### Pull Data, select Important Variables, and Create Subset ####
@@ -32,7 +33,7 @@ gss_used <- gss_used %>%  #select all important variables
     income_family,
     occupation,
     education,
-    education,
+    partner_education,
     partner_sex,
     region,
     pop_center,
@@ -68,9 +69,31 @@ gss_prepped <- gss_prepped %>%
                                 labels = seq(15, 80, by = 5), right = FALSE
          ))),)
 
-#Trying to group the education levels 
-#gss_prepped$education <- gsub("	Bachelor's degree (e.g. B.A., B.Sc., LL.B.)", "BA/College", gss_prepped$education)
+#Group both personal and partner education by level
+#Create key for the recoding
+recode_key <- c(
+  "Less than high school diploma or its equivalent" = "HS or less",
+  "High school diploma or a high school equivalency certificate" = "HS or less",
+  "High school diploma or a high school equivalency certi..." = "HS or less",
+  "Trade certificate or diploma" = "College / Trade",
+  "College, CEGEP or other non-university certificate or di..." = "College / Trade",
+  "College, CEGEP or other non-university certificate or d..." = "College / Trade",
+  "University certificate or diploma below the bachelor's level" = "University Undergraduate",
+  "Bachelor's degree (e.g. B.A., B.Sc., LL.B.)" = "University Undergraduate",
+  "Bachelor's degree (e.g. B.A., B.Sc., LL.B.)" = "University Undergraduate",
+  "University certificate, diploma or degree above the bach..." = "University Graduate",
+  "University certificate, diploma or degree above the ba..." = "University Graduate"
+)
+education_level0 <- recode(gss_prepped$education, !!!recode_key) #create vectors holding the recoded values
+partner_education_level0 <- recode(gss_prepped$partner_education, !!!recode_key)
+
+gss_prepped <- gss_prepped %>% #add recoded vectors to the tibble 
+  mutate(
+    education_level = education_level0,
+    partner_education_level = partner_education_level0
+  )
 
 
-write_csv(gss, "Outputs/gss-prepared-for-analysis.csv")
+
+write_csv(gss_prepped, "Outputs/gss-prepared-for-analysis.csv")
 

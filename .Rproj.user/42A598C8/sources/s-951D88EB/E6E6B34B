@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1602879375188.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "E6E6B34B",
+    "lastKnownWriteTime" : 1602869784,
+    "last_content_update" : 1602869784,
+    "path" : "~/U of T/2020 Fall/STA304/PS3/Inputs/gss_labels-1.txt",
+    "project_path" : "Inputs/gss_labels-1.txt",
+    "properties" : {
+        "cursorPosition" : "555,83",
+        "scrollLine" : "536"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 5,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "text"
+}
