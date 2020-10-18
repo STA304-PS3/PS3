@@ -92,8 +92,9 @@ Table x summaries our model results:
 
 ```{r}
 my_log_res <- data.frame(
-  variable = c("age", "income greater than $125,000", "income between $25,000 to $49,999", "income between $50,000 to $74,999", "income between $75,000 to $99,999", "income less than $25,000", "high school or less education", "University Graduate", "University Undergraduate","Poplation centered at PEI", "Rural areas and small population centres(non CMA/CA)"),
-  estimate = c(0.060790, 0.161424, -0.680099, -0.449230, -0.197017, -0.872898, -0.102521, -0.779989, -0.468140, 0.276375, 0.526007)
+  variable = c("intercept","age", "income greater than $125,000", "income between $25,000 to $49,999", "income between $50,000 to $74,999", "income between $75,000 to $99,999", "income less than $25,000", "high school or less education", "University Graduate", "University Undergraduate","Poplation centered at PEI", "Rural areas and small population centres(non CMA/CA)"),
+  estimate = c(-1.513991, 0.060790, 0.161424, -0.680099, -0.449230, -0.197017, -0.872898, -0.102521, -0.779989, -0.468140, 0.276375, 0.526007),
+  pvalue = c("< 2e-16", "< 2e-16", "0.0810", "8.24e-13", "3.49e-06", "0.0491", "< 2e-16", "0.0982", "< 2e-16", "9.25e-13", "0.0409", "2.86e-14" )
 )
 
 kable(my_log_res, caption = "Summary of Losgistic Estimates", 
@@ -115,7 +116,7 @@ $$
 
 Notice that we have incorporated our categorical variables using dummy variables. “inc1”, “inc2”, “inc3”, “inc4”, “inc5” represent the six income categories; "HS”,  "graduate" and "under" describe the four education levels; "PEI" and "rural" represent the three population center. 
 
-The model predicts the following result for the probability a woman has children p, rounded to three decimal places:
+The model predicts the following result for the probability a woman has children p, rounded to three decimal places. Since log is an one to one function with p, we say the change on $log(\frac{\hat{p}}{1-\hat{p}})$ is isomorphic to any change on p, the probalbility that a woman in Canada has children. 
 
 $$
 log(\frac{\hat{p}}{1-\hat{p}})= -1.51 +0.061x_{age}+0.161x_{inc_1}-0.68x_{inc_2}-0.449x_{inc_3}
@@ -129,9 +130,16 @@ $$
 +0.276x_{PEI}+0.526x_{rural} 
 $$
 
-Note that the interpretation of the dummy variables’ prediction results is by comparing it to a certain level that is not in the equation above. A $\hat{\beta}_{HS} = -0.103$ does not mean the coefficient for a high school level education is -0.103. It represents the difference of influence (on childbirth decision) between a woman who has a college level of education and a high school level of education. -0.103  indicates that a woman who has a high school degree or below is less likely to have children than a woman who has a college degree. 
+The interpretation of the dummy variables’ prediction results is comparing it to a certain level that is not in the equation above. A $\hat{\beta}_{HS} = -0.103$ does not mean the coefficient for a high school level education is -0.103. It represents the difference of influence (on childbirth decision) between a woman who has a college level of education and a high school level of education. -0.103  indicates that a woman who has a high school degree or below is less likely to have children than a woman who has a college degree if it is influential at all depending on the p-value.
 
-```{r}
+Using $\alpha = 0.05, H_0: \hat{\beta} = 0, \hat{\beta} \neq0$, 
+the p values indicate weak evidence that having a family income higher than 125,000 dollars/year affects a woman's probability of having children. At the same time, it is evident that other income levels do influence the probability. A p-value of 0.0982 > 0.05 indicates weak evidence to reject $H_0$; therefore, we cannot say having high school or fewer education influences a woman's probability of having children.
+
+There is evidence that both having a family income between 75,000 to 99,999 dollars per year and living in an area with a population center at PEI have influences on p because their p values are smaller but close to 0.05. There is strong evidence that the rest of the variables influences p.
+
+All else the same, an older woman is more likely to have children than a young woman. A woman's family income affects her decision to have children when the income is below 125,000 dollars per year. Having a university graduate or undergraduate degree reduces a woman's probability of having children comparing to having a college degree while having high school or less education does not affect that decision. A woman living in PEI or rural areas and smaller population centers are more likely to have children than a woman living in urban areas and larger population centers.
+
+```{r, include = FALSE}
 summary(my_logit_dd)
 ```
 
