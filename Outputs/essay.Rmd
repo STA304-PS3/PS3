@@ -110,7 +110,7 @@ Figure2 <- display_data2 %>% #Create an overall view of Age of respondents
 Figure2 
 ```
 
-![Canadian Income Levels 2010](2010-Canada-Income.gif)
+![Canadian Income Levels 2010](2010-Canada-Income.png)
 
 What these two modes of analysis show is that the frame of data collection had a significant effect on those that were surveyed. 
 
