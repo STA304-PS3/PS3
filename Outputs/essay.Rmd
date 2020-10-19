@@ -77,7 +77,9 @@ This will affect all of our data in the same manner. While we will be working wi
 
 Something of note in the data collection is that income was collected by connecting households to their household tax returns. This means that much of the ambiguity often present in self reported income survey responses was removed from the data. This is hugely useful for better studying low and high income individuals as they have commonly been known to over or under report their earnings. 
 
-Now to dig deeper into the data. Based on the number of respondents able to be used in this analysis, 10,916, and the overall female population of Canada 17.8 million, the analysis should have a general confidence level of 95%. However, to check against obvious sampling errors let’s review the ages of respondents, their incomes, and their education levels.
+For further information the User Guide and Raw Codebook of the GSS has been included in the "Data Information" file in this projects related Github. 
+
+Now to dig deeper into the data. Based on the number of respondents able to be used in this analysis, 10,916, and the overall female population of Canada 17.8 million, the analysis should have a general confidence level of 95% (Survey Systems 2020). However, to check against obvious sampling errors let’s review the ages of respondents, their incomes, and their education levels.
 
 Figure 1 displays the general breakdown of respondents ages. This is followed by a table taken from Anne Milan’s report on the age of the Female population in Canada (Milan 2016). As can be seen the sampling method caused an over representation of older individuals and an under representation of the young. This could have to do with the requirement of a stable address, or because of the voluntary nature of the survey. 
 
@@ -289,13 +291,18 @@ summary(my_logit_dd)
 
 ## References
 - Monica Alexander (2019). “Analyzing Name Changes after Marriage Using a Non-Representative Survey.” Monica Alexander, 7 Sept. 2019, www.monicaalexander.com/posts/2019-08-07-mrp/.
+- Rohan Alexander and Sam Caetano (2020). "GSS_Cleaning" Retreived from https://q.utoronto.ca/courses/184062
 - JJ Allaire and Yihui Xie and Jonathan McPherson and Javier Luraschi and Kevin Ushey and Aron Atkins and Hadley Wickham and Joe Cheng
 and Winston Chang and Richard Iannone (2020). rmarkdown: Dynamic Documents for R. R package version 2.3. URL
 https://rmarkdown.rstudio.com.
+- Sam Firke (2020). janitor: Simple Tools for Examining and Cleaning Dirty Data. R package version 2.0.1.
+https://CRAN.R-project.org/package=janitor
+- GSS. (2017). General Social Survey – Family (GSS). Retrieved from https://www.statcan.gc.ca/eng/survey/household/4501
 - Lauren Kennedy, and Jonah Gabry (2020). “MRP with Rstanarm.” Rstanarm, mc-stan.org/rstanarm/articles/mrp.html.
 - Anne Milan (2016). “Female Population.” Government of Canada, Statistics Canada, www150.statcan.gc.ca/n1/pub/89-503-x/2015001/article/14152-eng.htm.
 - Statistics Canada (2018). “Income Reference Guide, National Household Survey, 2011.” Government of Canada, Statistics Canada, www12.statcan.gc.ca/nhs-enm/2011/ref/guides/99-014-x/99-014-x2011006-eng.cfm.
 - Statistics Canada (2019). “2016 Census.” Highest Level of Educational Attainment (General) by Selected Age Groups 25 to 64, Both Sexes, % Distribution 2016, Canada, Provinces and Territories, 2016 Census – 25% Sample Data, www12.statcan.gc.ca/census-recensement/2016/dp-pd/hlt-fst/edu-sco/Table.cfm?Lang=E&T=11&Geo=00&SP=1&view=2&age=2&sex=1
+- Survey Systems (2020). “Sample Size Calculator.” Sample Size Calculator - Confidence Level, Confidence Interval, Sample Size, Population Size, Relevant Population - Creative Research Systems, 2020, www.surveysystem.com/sscalc.htm.
 - Yihui Xie (2020). knitr: A General-Purpose Package for Dynamic Report Generation in R. R package version 1.29.
 - Yihui Xie (2015) Dynamic Documents with R and knitr. 2nd edition. Chapman and Hall/CRC. ISBN 978-1498716963
 - Yihui Xie (2014) knitr: A Comprehensive Tool for Reproducible Research in R. In Victoria Stodden, Friedrich Leisch and Roger D.
