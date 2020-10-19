@@ -2,7 +2,13 @@
 title: "TBD"
 author: "Arjun Dhatt, Benjamin Draskovic, Yiqu Ding, Gantavya Gupta"
 date: "10/16/2020"
-output: pdf_document
+output: 
+  pdf_document:
+    fig_width: 6.1
+    fig_height: 3.2
+    fig_crop: false
+    fig_caption: no
+  
 ---
 
 ```{r setup, include=FALSE}
@@ -12,6 +18,7 @@ library(knitr)
 library(ggplot2)
 library(tidyverse)
 library(scales)
+library(kableExtra)
 ```
 
 ## Abstract
@@ -23,29 +30,39 @@ This analysis uses the data collected by the 2017 General Social Survey (GSS). A
 
 ### Table 1
 ```{r, tidy =FALSE, echo =FALSE, warning= FALSE}
-my_data <- read.csv("gss-prepared-for-analysis.csv")
+my_data <- read.csv("gss-prepared-for-analysis.csv") #read in the data 
 
-display_data <- my_data %>% 
+display_data <- my_data %>% #Select variables of interest 
   select(
     caseid,
     sex,
     child,
     age,
     income_family,
-    religion_importance,
     education_level,
-    region,
     pop_center
   )
 
-# Table 1
+#Shorten the response descriptions
+display_data[display_data=="Larger urban population centres (CMA/CA)"] <- "Urban"
+display_data[display_data=="Rural areas and small population centres (non CMA/CA)"] <- "Rural"
+display_data[display_data=="$25,000 to $49,999"] <- "25k to 50k"
+display_data[display_data=="Less than $25,000"] <- "25k or less"
+display_data[display_data=="$50,000 to $74,999"] <- "50k to 75k"
+display_data[display_data=="$75,000 to $99,999"] <- "75k to 100k"
+display_data[display_data=="$100,000 to $ 124,999"] <- "100k to 125k"
+display_data[display_data=="$125,000 and more"] <- "125k or more"
+
+
+# Table 1 of the first couple responses 
 
 Table1 <- head(display_data) %>% 
   kable(align = "c",
         format = "simple",
         col.names = c("Case ID", "Sex", "Have Children", "Age", 
-                      "Family Income", "Importance of Religion", "Education Level", "Province", "Urban / Rural"),
-        )
+                      "Family Income", "Education Level", "Urban / Rural"),
+        ) %>% 
+  kable_styling(font_size = 5)
   
 Table1
 ```
@@ -76,18 +93,21 @@ Figure1 <- my_data %>% #Create an overall view of Age of respondents
 Figure1 
 ```
 
+### Figure 1.B Canadian Female Population by Age 2014
 ![Canadian Female Population  by Age 2014](2014-Canada-Female-Population.png)
+(Milan 2016)
 
-Figure 2 displays the general breakdown of respondents by Family/Household income. When comparing this to a table provided by the 2010 National Household Survey, despite the difference in bin definition, we see that there are highly skewed results towards those with higher incomes (NHS 2010). Both data sets used non-institutionalized Canadians aged 15 and older, who lived together in a household.  Again this could be both from the fact that addresses were required meaning those living more transiently were not tracked properly, and individuals had to be willing to provide a large amount of their time voluntarily. Something that could be more difficult for someone making a lower income. 
+Figure 2 displays the general breakdown of respondents by Family/Household income. When comparing this to a table provided by the 2010 National Household Survey, despite the difference in bin definition, we see that there are highly skewed results towards those with higher incomes (Stats Canada 2018). Both data sets used non-institutionalized Canadians aged 15 and older, who lived together in a household.  Again this could be both from the fact that addresses were required meaning those living more transiently were not tracked properly, and individuals had to be willing to provide a large amount of their time voluntarily. Something that could be more difficult for someone making a lower income. 
 
 ### Figure 2
 ```{r, tidy =FALSE, echo =FALSE, warning= FALSE}
-display_data2 <- my_data %>% 
+display_data2 <- my_data %>% #select smaller subset fo data 
   select(
     age_group,
     income_family
   )
 
+#Shorten the responses 
 display_data2[display_data2=="$25,000 to $49,999"] <- "25k to 50k"
 display_data2[display_data2=="Less than $25,000"] <- "25k or less"
 display_data2[display_data2=="$50,000 to $74,999"] <- "50k to 75k"
@@ -97,28 +117,30 @@ display_data2[display_data2=="$125,000 and more"] <- "125k or more"
 
 
 
-Figure2 <- display_data2 %>% #Create an overall view of Age of respondents 
+Figure2 <- display_data2 %>% #Create an overall view of family income for the respondents 
     mutate(income_family = fct_relevel(income_family, 
             "25k or less", "25k to 50k", "50k to 75k", 
             "75k to 100k", "100k to 125k", "125k or more")) %>%
   ggplot(aes(x = income_family)) +
   geom_bar(aes(y = (..count..)/sum(..count..)), stat = "count", fill = "steelblue") + 
-  scale_y_continuous(labels=scales::percent) +
+  scale_y_continuous(labels=scales::percent) + #Make it a percentage based scale
   labs(title = "Respondants by Family/Household Income", y = "Percentage Frequencies", x = "Family/Household Income")+
   theme_minimal()  #Adjust how it is displayed 
   
 Figure2 
 ```
 
+### Figure 2.B Canadian Family Income Levels 2010
 ![Canadian Income Levels 2010](2010-Canada-Income.png)
+(Stats Canada 2018)
 
 What these two modes of analysis show is that the frame of data collection had a significant effect on those that were surveyed. 
 
-However, looking at Figure 3 shows the breakdown by Education Level. When comparing this table to a distribution from the 2016 Census we see that the sample population is similarly distributed to the Canadian population (Stats Canada 2016). While the bins are defined differently, combining the census bins together as well as combining our split of Undergraduate versus Graduate University degrees all percentages are within 10% of each other. 
+However, looking at Figure 3 shows the breakdown by Education Level. When comparing this table to a distribution from the 2016 Census we see that the sample population is similarly distributed to the Canadian population (Stats Canada 2019). While the bins are defined differently, combining the census bins together as well as combining our split of Undergraduate versus Graduate University degrees all percentages are within 10% of each other. 
 
 ### Figure 3
 ```{r, tidy =FALSE, echo =FALSE, warning= FALSE}
-Figure3 <- my_data %>% #Create an overall view of Age of respondents 
+Figure3 <- my_data %>% #Create an overall view of education level of respondents 
   mutate(education_level = fct_relevel(education_level, 
             "HS or less", "College / Trade", "University Undergraduate", 
             "University Graduate")) %>%
@@ -131,7 +153,9 @@ Figure3 <- my_data %>% #Create an overall view of Age of respondents
 Figure3 
 ```
 
+### Figure 3.B Canadian Education Levels by Percentage 2016
 ![Canadian Education Levels by Percentage 2016](2016-Canada-Education.png)
+(Stats Canada 2019)
 
 Having said all this the average likelihood or probability that a woman would have children in our sample was 0.73. Next we will begin to model this probability to see how it is affected by our independent variables. 
 
@@ -264,8 +288,26 @@ summary(my_logit_dd)
 
 
 ## References
-
-- https://mc-stan.org/rstanarm/articles/mrp.html
-
-- https://www.monicaalexander.com/posts/2019-08-07-mrp/
+- Monica Alexander (2019). “Analyzing Name Changes after Marriage Using a Non-Representative Survey.” Monica Alexander, 7 Sept. 2019, www.monicaalexander.com/posts/2019-08-07-mrp/.
+- JJ Allaire and Yihui Xie and Jonathan McPherson and Javier Luraschi and Kevin Ushey and Aron Atkins and Hadley Wickham and Joe Cheng
+and Winston Chang and Richard Iannone (2020). rmarkdown: Dynamic Documents for R. R package version 2.3. URL
+https://rmarkdown.rstudio.com.
+- Lauren Kennedy, and Jonah Gabry (2020). “MRP with Rstanarm.” Rstanarm, mc-stan.org/rstanarm/articles/mrp.html.
+- Anne Milan (2016). “Female Population.” Government of Canada, Statistics Canada, www150.statcan.gc.ca/n1/pub/89-503-x/2015001/article/14152-eng.htm.
+- Statistics Canada (2018). “Income Reference Guide, National Household Survey, 2011.” Government of Canada, Statistics Canada, www12.statcan.gc.ca/nhs-enm/2011/ref/guides/99-014-x/99-014-x2011006-eng.cfm.
+- Statistics Canada (2019). “2016 Census.” Highest Level of Educational Attainment (General) by Selected Age Groups 25 to 64, Both Sexes, % Distribution 2016, Canada, Provinces and Territories, 2016 Census – 25% Sample Data, www12.statcan.gc.ca/census-recensement/2016/dp-pd/hlt-fst/edu-sco/Table.cfm?Lang=E&T=11&Geo=00&SP=1&view=2&age=2&sex=1
+- Yihui Xie (2020). knitr: A General-Purpose Package for Dynamic Report Generation in R. R package version 1.29.
+- Yihui Xie (2015) Dynamic Documents with R and knitr. 2nd edition. Chapman and Hall/CRC. ISBN 978-1498716963
+- Yihui Xie (2014) knitr: A Comprehensive Tool for Reproducible Research in R. In Victoria Stodden, Friedrich Leisch and Roger D.
+Peng, editors, Implementing Reproducible Computational Research. Chapman and Hall/CRC. ISBN 978-1466561595
+- Yihui Xie and J.J. Allaire and Garrett Grolemund (2018). R Markdown: The Definitive Guide. Chapman and Hall/CRC. ISBN 9781138359338.
+URL https://bookdown.org/yihui/rmarkdown.
+- Hadley Wickham, Romain François, Lionel Henry and Kirill Müller (2020). dplyr: A Grammar of Data Manipulation. R package version
+1.0.2. https://CRAN.R-project.org/package=dplyr
+- Wickham et al., (2019). Welcome to the tidyverse. Journal of Open Source Software, 4(43), 1686, https://doi.org/10.21105/joss.01686
+- Hadley Wickham and Dana Seidel (2020). scales: Scale Functions for Visualization. R package version 1.1.1.
+https://CRAN.R-project.org/package=scales
+- H. Wickham. ggplot2: Elegant Graphics for Data Analysis. Springer-Verlag New York, 2016.
+- Hao Zhu (2020). kableExtra: Construct Complex Table with 'kable' and Pipe Syntax. R package version 1.2.1.
+https://CRAN.R-project.org/package=kableExtra
 
