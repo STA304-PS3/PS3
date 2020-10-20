@@ -101,87 +101,7 @@ Something of note in the data collection is that income was collected by connect
 
 For further information the User Guide and Raw Codebook of the GSS has been included in the "Data Information" file in this projects related Github. 
 
-Now to dig deeper into the data. Based on the number of respondents able to be used in this analysis, 10,916, and the overall female population of Canada 17.8 million, the analysis should have a general confidence level of 95% (Survey Systems 2020). However, to check against obvious sampling errors let’s review the ages of respondents, their incomes, and their education levels.
-
-Figure 1 displays the general breakdown of respondents ages. This is followed by a table taken from Anne Milan’s report on the age of the Female population in Canada (Milan 2016). As can be seen the sampling method caused an over representation of older individuals and an under representation of the young. This could have to do with the requirement of a stable address, or because of the voluntary nature of the survey. 
-
-### Figure 1
-```{r, tidy =FALSE, echo =FALSE, warning= FALSE}
-Figure1 <- my_data %>% #Create an overall view of Age of respondents 
-  ggplot(aes(x = age_group)) +
-  geom_bar(aes(y = ..prop..), stat = "count", fill = "steelblue") + 
-  scale_y_continuous(labels=scales::percent) +
-  labs(title = "Respondants by Age Group", y = "Percentage Frequencies", x = "Age Group")+
-  theme_minimal()  #Adjust how it is displayed 
-  
-Figure1 
-```
-
-### Figure 1.B Canadian Female Population by Age 2014
-![Canadian Female Population  by Age 2014](2014-Canada-Female-Population.png)
-(Milan 2016)
-
-Figure 2 displays the general breakdown of respondents by Family/Household income. When comparing this to a table provided by the 2010 National Household Survey, despite the difference in bin definition, we see that there are highly skewed results towards those with higher incomes (Stats Canada 2018). Both data sets used non-institutionalized Canadians aged 15 and older, who lived together in a household.  Again this could be both from the fact that addresses were required meaning those living more transiently were not tracked properly, and individuals had to be willing to provide a large amount of their time voluntarily. Something that could be more difficult for someone making a lower income. 
-
-### Figure 2
-```{r, tidy =FALSE, echo =FALSE, warning= FALSE}
-display_data2 <- my_data %>% #select smaller subset fo data 
-  select(
-    age_group,
-    income_family
-  )
-
-#Shorten the responses 
-display_data2[display_data2=="$25,000 to $49,999"] <- "25k to 50k"
-display_data2[display_data2=="Less than $25,000"] <- "25k or less"
-display_data2[display_data2=="$50,000 to $74,999"] <- "50k to 75k"
-display_data2[display_data2=="$75,000 to $99,999"] <- "75k to 100k"
-display_data2[display_data2=="$100,000 to $ 124,999"] <- "100k to 125k"
-display_data2[display_data2=="$125,000 and more"] <- "125k or more"
-
-
-
-Figure2 <- display_data2 %>% #Create an overall view of family income for the respondents 
-    mutate(income_family = fct_relevel(income_family, 
-            "25k or less", "25k to 50k", "50k to 75k", 
-            "75k to 100k", "100k to 125k", "125k or more")) %>%
-  ggplot(aes(x = income_family)) +
-  geom_bar(aes(y = (..count..)/sum(..count..)), stat = "count", fill = "steelblue") + 
-  scale_y_continuous(labels=scales::percent) + #Make it a percentage based scale
-  labs(title = "Respondants by Family/Household Income", y = "Percentage Frequencies", x = "Family/Household Income")+
-  theme_minimal()  #Adjust how it is displayed 
-  
-Figure2 
-```
-
-### Figure 2.B Canadian Family Income Levels 2010
-![Canadian Income Levels 2010](2010-Canada-Income.png)
-(Stats Canada 2018)
-
-What these two modes of analysis show is that the frame of data collection had a significant effect on those that were surveyed. 
-
-However, looking at Figure 3 shows the breakdown by Education Level. When comparing this table to a distribution from the 2016 Census we see that the sample population is similarly distributed to the Canadian population (Stats Canada 2019). While the bins are defined differently, combining the census bins together as well as combining our split of Undergraduate versus Graduate University degrees all percentages are within 10% of each other. 
-
-### Figure 3
-```{r, tidy =FALSE, echo =FALSE, warning= FALSE}
-Figure3 <- my_data %>% #Create an overall view of education level of respondents 
-  mutate(education_level = fct_relevel(education_level, 
-            "HS or less", "College / Trade", "University Undergraduate", 
-            "University Graduate")) %>%
-  ggplot(aes(x = education_level)) +
-  geom_bar(aes(y = (..count..)/sum(..count..)), stat = "count", fill = "steelblue") + 
-  scale_y_continuous(labels=scales::percent) +
-  labs(title = "Respondants by Education Level", y = "Percentage Frequencies", x = "Education Level")+
-  theme_minimal()  #Adjust how it is displayed 
-  
-Figure3 
-```
-
-### Figure 3.B Canadian Education Levels by Percentage 2016
-![Canadian Education Levels by Percentage 2016](2016-Canada-Education.png)
-(Stats Canada 2019)
-
-Having said all this the average likelihood or probability that a woman would have children in our sample was 0.73. Next we will begin to model this probability to see how it is affected by our independent variables. 
+Based on the number of respondents able to be used in this analysis, 10,916, and the overall female population of Canada 17.8 million, the analysis should have a general confidence level of 95% (Survey Systems 2020). The average likelihood or probability that a woman would have children in our sample was 0.73. Next we will begin to model this probability to see how it is affected by our independent variables. 
 
 
 ## Model
@@ -308,43 +228,23 @@ summary(my_logit_dd)
 
 ## Discussion
 
-Below is the data set used in this analysis: 
+In conclusion modeling the GSS data shows that there are significant effects on a woman's choice to have children by age, income, education, and the type of population center they live in. This data is important as it both helps understand the decision making process percpective mothers must face and it can help identify possible barriers to having children. 
 
-```{r, tidy =FALSE, echo =FALSE, warning= FALSE}
-my_data <- read.csv("gss-prepared-for-analysis.csv") #read in the data 
-display_data <- my_data %>% #Select variables of interest 
-  select(
-    caseid,
-    sex,
-    child,
-    age,
-    income_family,
-    education_level,
-    pop_center
-  )
-#Shorten the response descriptions
-display_data[display_data=="Larger urban population centres (CMA/CA)"] <- "Urban"
-display_data[display_data=="Rural areas and small population centres (non CMA/CA)"] <- "Rural"
-display_data[display_data=="$25,000 to $49,999"] <- "25k to 50k"
-display_data[display_data=="Less than $25,000"] <- "25k or less"
-display_data[display_data=="$50,000 to $74,999"] <- "50k to 75k"
-display_data[display_data=="$75,000 to $99,999"] <- "75k to 100k"
-display_data[display_data=="$100,000 to $ 124,999"] <- "100k to 125k"
-display_data[display_data=="$125,000 and more"] <- "125k or more"
-# Table 1 of the first couple responses 
-Table1 <- head(display_data) %>% 
-  kable(align = "c",
-        format = "simple",
-        col.names = c("Case ID", "Sex", "Have Children", "Age", 
-                      "Family Income", "Education Level", "Urban / Rural"),
-        ) %>% 
-  kable_styling(font_size = 5)
-  
-Table1
-```
+Firstly, older women are more likely to have made the decision to have children. This could both be from the fact that older women have had more opportunities to have children and/or be based on the views older generations have on child bearing. This data shows evidence of the common tendency found in the Canadian Demographic make up known as the "Reverse Pyramid." That there are continually fewer young children being born then their were previously.
 
-After observing the data set, we noticed some immediate trends. One of the most prominent trends was that the data was skewed towards the older population. This is evident below: 
+Secondly, unlike the common myth that the poor are the ones having large numbers of children the data shows that those making under $100,000 a year as a household were far less likely to have children then those who did make $100,000 annually. This does make some intuitive sense as havign a child is a large commitment in resources the family must provide. This also could be a barrier to childbirth for women who are interested in having children. 
 
+This is further supported by the finding that when a woman's household begin making $100,000 or more the effect income had on her decision to have children essentially dissappeared. This suggests that once the prospect of having a child is no longer going to strain a families income it becomes a matter of choice based upon a woman's own preferences rather than external forces. 
+
+Thirdly, when looking at education level we see that the more highly educated a woman becomes the less likely they are to have children. This is an oft mentionned phenomina that could be linked to the amount of time and resources it takes to pursue higher education. Or it could be linked to other hypothesis on how damaging takign a break in your career to have children can be to loing term career success. This does work off the assumption that those seeking higher education are highly career focused however.
+
+Fourthly, it is interesting to note that women living in PEI or in Rural areas in other provinces were significantly more likely to have children then those living in dense urban centers. This could represent a difference in cultural norms and gender roles in rural communities. Or it could represent the fact that rural communities are often safer places to raise children, due to their lower crime rates and increased space. It is difficult to parce out the reason for this effect without further study.
+
+It is however important to re-examine possible sampling errors that exist with in the data set. In order to do this let's review the ages of respondents, their incomes, and their education levels, seeing if these distributions match teh expected population distributions.
+
+Figure 1 displays the general breakdown of respondents ages. This is followed by a table taken from Anne Milan’s report on the age of the Female population in Canada (Milan 2016). As can be seen the sampling method caused an over representation of older individuals and an under representation of the young. This could have to do with the requirement of a stable address, or because of the voluntary nature of the survey. 
+
+### Figure 1
 ```{r, tidy =FALSE, echo =FALSE, warning= FALSE}
 Figure1 <- my_data %>% #Create an overall view of Age of respondents 
   ggplot(aes(x = age_group)) +
@@ -356,16 +256,20 @@ Figure1 <- my_data %>% #Create an overall view of Age of respondents
 Figure1 
 ```
 
-Clearly, in the above figure, we see an underrepresentation of the population aged younger than 50 compared to the population aged older than 50. This skewed distribution can result in severe bias in our results as it will overrepresent the population older than 50.  
+### Figure 1.B Canadian Female Population by Age 2014
+![Canadian Female Population  by Age 2014](2014-Canada-Female-Population.png)
+(Milan 2016)
 
-Another trend we see in our data that can affect our results is in income. Below is a distribution of family income: 
+Figure 2 displays the general breakdown of respondents by Family/Household income. When comparing this to a table provided by the 2010 National Household Survey, despite the difference in bin definition, we see that there are highly skewed results towards those with higher incomes (Stats Canada 2018). Both data sets used non-institutionalized Canadians aged 15 and older, who lived together in a household.  Again this could be both from the fact that addresses were required meaning those living more transiently were not tracked properly, and individuals had to be willing to provide a large amount of their time voluntarily. Something that could be more difficult for someone making a lower income. 
 
+### Figure 2
 ```{r, tidy =FALSE, echo =FALSE, warning= FALSE}
 display_data2 <- my_data %>% #select smaller subset fo data 
   select(
     age_group,
     income_family
   )
+
 #Shorten the responses 
 display_data2[display_data2=="$25,000 to $49,999"] <- "25k to 50k"
 display_data2[display_data2=="Less than $25,000"] <- "25k or less"
@@ -373,6 +277,9 @@ display_data2[display_data2=="$50,000 to $74,999"] <- "50k to 75k"
 display_data2[display_data2=="$75,000 to $99,999"] <- "75k to 100k"
 display_data2[display_data2=="$100,000 to $ 124,999"] <- "100k to 125k"
 display_data2[display_data2=="$125,000 and more"] <- "125k or more"
+
+
+
 Figure2 <- display_data2 %>% #Create an overall view of family income for the respondents 
     mutate(income_family = fct_relevel(income_family, 
             "25k or less", "25k to 50k", "50k to 75k", 
@@ -386,7 +293,33 @@ Figure2 <- display_data2 %>% #Create an overall view of family income for the re
 Figure2 
 ```
 
-It is evident in the figure above that our sample does contain a large proportion that has income greater than $125,000 which can result in bias in our results. 
+### Figure 2.B Canadian Family Income Levels 2010
+![Canadian Income Levels 2010](2010-Canada-Income.png)
+(Stats Canada 2018)
+
+What these two modes of analysis show is that the frame and methodology of the data collection had a significant effect on those that were surveyed. 
+
+However, not all demographic variables were skewed like this. Looking at Figure 3 one can see the breakdown by Education Level. When comparing this table to a distribution from the 2016 Census we see that the sample population is similarly distributed to the Canadian population (Stats Canada 2019). While the bins are defined differently, combining the census bins together as well as combining our split of Undergraduate versus Graduate University degrees all percentages are near population levels. There only being a small 10% difference from one to the other. 
+
+### Figure 3
+```{r, tidy =FALSE, echo =FALSE, warning= FALSE}
+Figure3 <- my_data %>% #Create an overall view of education level of respondents 
+  mutate(education_level = fct_relevel(education_level, 
+            "HS or less", "College / Trade", "University Undergraduate", 
+            "University Graduate")) %>%
+  ggplot(aes(x = education_level)) +
+  geom_bar(aes(y = (..count..)/sum(..count..)), stat = "count", fill = "steelblue") + 
+  scale_y_continuous(labels=scales::percent) +
+  labs(title = "Respondants by Education Level", y = "Percentage Frequencies", x = "Education Level")+
+  theme_minimal()  #Adjust how it is displayed 
+  
+Figure3 
+```
+
+### Figure 3.B Canadian Education Levels by Percentage 2016
+![Canadian Education Levels by Percentage 2016](2016-Canada-Education.png)
+(Stats Canada 2019)
+
 
 ### Weaknesses and Next Steps 
 
@@ -396,7 +329,9 @@ Another potential weakness of the dataset is that it only contains information o
 
 Since we are modeling what factors influence a woman’s choice to have children, it would be ideal for collecting longitudinal data. Because we are only collecting information at a certain point in time, our analysis may be missing out on certain influential factors. Collecting data from someone who is 80 years old will be drastically different from collecting data from someone in their 20s. The older our respondents are, the more likely they are to have already had a child at some point in their life.  A solution to this problem could be to collect longitudinal data to compare all respondents from the same perspective. Another solution, in this case, could be to conduct an in-depth interview rather than a survey. An in-depth interview ensures that we receive more detailed responses. Asking questions about when they decided to have children and what their life situation was like can provide much more meaningful information and more meaningful results. 
 
-The dataset we used in the analysis has an average that is much older than the average Canadian population and an average income relatively high. To address this issue, the next step in this analysis can be to used post-stratification. This allows our sample to reflect the population, making our results more meaningful and more accurate. 
+The dataset we used in the analysis has an average that is much older than the average Canadian population and an average income relatively high. To address this issue, the next step in this analysis can be to use post-stratification. This allows our sample to reflect the population, making our results more meaningful and more accurate. 
+
+With these next steps this data can help to identify patterns in women's decisions to give birth and possible barriers women making that decision may have to face. 
 
 ## References
 
