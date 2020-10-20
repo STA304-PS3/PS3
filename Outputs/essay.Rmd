@@ -314,7 +314,7 @@ dummy_income <- data.frame(
   inc6 = c(0,0,0,0,0,0)
 )
 
-kable(dummy_income, caption = "Dummy Variable Coding Set Up for Income Levels")
+kable(dummy_income, caption = "Dummy Variable Coding Set Up for Income Levels", format = "markdown")
 ```
 
 
@@ -328,7 +328,7 @@ dummy_edu <- data.frame(
   college = c(0,0,0,0)
 )
 
-kable(dummy_edu, caption = "Dummy Variable Coding Set Up for Education Levels")
+kable(dummy_edu, caption = "Dummy Variable Coding Set Up for Education Levels", format = "markdown")
 ```
 
 
@@ -341,7 +341,7 @@ dummy_pop <- data.frame(
   urban = c(0,0,0)
 )
 
-kable(dummy_pop, caption = "Dummy Variable Coding Set Up for Population Center")
+kable(dummy_pop, caption = "Dummy Variable Coding Set Up for Population Center", format = "markdown")
 ```
 
 ## References
