@@ -1,5 +1,5 @@
 ---
-title: "TBD"
+title: "The importance of Age, Family Income, Education Level and Population Centre On When a Woman Decides to Have a Child Is Multifaceted"
 author: "Arjun Dhatt, Benjamin Draskovic, Yiqu Ding, Gantavya Gupta"
 date: "10/19/2020"
 output: 
@@ -23,9 +23,31 @@ library(kableExtra)
 
 ## Abstract
 
+In this report, we will be looking at the different factors that affect a woman’s choice of having children. We filtered the 2017 GSS (General Social Survey) dataset to include variables related to our studies, such as age, family income, education level, and population center. Then we ran a logistic regression-based model to identify the factors that affect a woman’s choice to have children. After completing our analysis, we concluded that age, income, education, and region do affect a woman’s choice to have children. Our analysis results are essential because they help find factors that influence birth rates, which can aid in determining population demographics. 
+
 ## Introduction
 
+Many factors can influence a woman’s choice of whether or not to have children and the information can be used in many ways. This poses an interesting question — what factors influence a woman’s choice to have children? 
+
+In this report, we decided to further investigate this question by deeply analyzing the different factors that influence a woman’s choice to have children. Using the 2017 GSS (General Social Survey) data set, we began by identifying various variables that we thought could influence our analysis. We decided to inspect the following variables: 
+
+-	Age
+-	Family Income 
+-	Education Level 
+-	Population Center 
+
+Because we are looking at factors that influence a woman’s choice to have children, we decided to look at only a subset of the data — only female respondents.  
+
+To conduct the analysis, we decided to use logistic regression.  In our study, variables such as family income, education level, and population center are categorical variables; to accommodate these variables, we used dummy variables to incorporate them in the logistic regression.  
+
+After looking at the results from our logistic regression and using a significance level of 0.05, we inspected the p-values of different variables to determine if the variables significantly influence the probability a woman has children. Age was determined to be a significant factor; income for those making an income less than 100,000 was determined to be influential; Population centered at PEI, rural and small population centers were also determined to be substantial. 
+
+The results from our analysis could be useful in many different ways. Information about factors that influence a woman’s choice to have children can be used for information related to population demographics. Countries with low birth rates can also find the results of our analysis useful as it can help them determine factors that can raise the birth rates. 
+
+In this report, we will begin by discussing the data set and then model our results.
+
 ## Data
+
 This analysis uses the data collected by the 2017 General Social Survey (GSS). A survey done by the Social and Aboriginal Statistics Division of Statistics Canada. Their focus for that year of data collection was Family and the different forms family takes across Canada. This involved collecting data on current living arrangements, child care, household chores splits and many more. However, for the purpose of this analysis the key pieces of collected data are whether or not a female respondent has had children, what her reported education level is, how religious they are, how old they are, what their current family income is, and whether they live in a rural or urban community. Table 1 displays the first couple responses along the variables of interest.
 
 ### Table 1
@@ -286,10 +308,98 @@ summary(my_logit_dd)
 
 ## Discussion
 
+Below is the data set used in this analysis: 
 
+```{r, tidy =FALSE, echo =FALSE, warning= FALSE}
+my_data <- read.csv("gss-prepared-for-analysis.csv") #read in the data 
+display_data <- my_data %>% #Select variables of interest 
+  select(
+    caseid,
+    sex,
+    child,
+    age,
+    income_family,
+    education_level,
+    pop_center
+  )
+#Shorten the response descriptions
+display_data[display_data=="Larger urban population centres (CMA/CA)"] <- "Urban"
+display_data[display_data=="Rural areas and small population centres (non CMA/CA)"] <- "Rural"
+display_data[display_data=="$25,000 to $49,999"] <- "25k to 50k"
+display_data[display_data=="Less than $25,000"] <- "25k or less"
+display_data[display_data=="$50,000 to $74,999"] <- "50k to 75k"
+display_data[display_data=="$75,000 to $99,999"] <- "75k to 100k"
+display_data[display_data=="$100,000 to $ 124,999"] <- "100k to 125k"
+display_data[display_data=="$125,000 and more"] <- "125k or more"
+# Table 1 of the first couple responses 
+Table1 <- head(display_data) %>% 
+  kable(align = "c",
+        format = "simple",
+        col.names = c("Case ID", "Sex", "Have Children", "Age", 
+                      "Family Income", "Education Level", "Urban / Rural"),
+        ) %>% 
+  kable_styling(font_size = 5)
+  
+Table1
+```
 
+After observing the data set, we noticed some immediate trends. One of the most prominent trends was that the data was skewed towards the older population. This is evident below: 
+
+```{r, tidy =FALSE, echo =FALSE, warning= FALSE}
+Figure1 <- my_data %>% #Create an overall view of Age of respondents 
+  ggplot(aes(x = age_group)) +
+  geom_bar(aes(y = ..prop..), stat = "count", fill = "steelblue") + 
+  scale_y_continuous(labels=scales::percent) +
+  labs(title = "Respondants by Age Group", y = "Percentage Frequencies", x = "Age Group")+
+  theme_minimal()  #Adjust how it is displayed 
+  
+Figure1 
+```
+
+Clearly, in the above figure, we see an underrepresentation of the population aged younger than 50 compared to the population aged older than 50. This skewed distribution can result in severe bias in our results as it will overrepresent the population older than 50.  
+
+Another trend we see in our data that can affect our results is in income. Below is a distribution of family income: 
+
+```{r, tidy =FALSE, echo =FALSE, warning= FALSE}
+display_data2 <- my_data %>% #select smaller subset fo data 
+  select(
+    age_group,
+    income_family
+  )
+#Shorten the responses 
+display_data2[display_data2=="$25,000 to $49,999"] <- "25k to 50k"
+display_data2[display_data2=="Less than $25,000"] <- "25k or less"
+display_data2[display_data2=="$50,000 to $74,999"] <- "50k to 75k"
+display_data2[display_data2=="$75,000 to $99,999"] <- "75k to 100k"
+display_data2[display_data2=="$100,000 to $ 124,999"] <- "100k to 125k"
+display_data2[display_data2=="$125,000 and more"] <- "125k or more"
+Figure2 <- display_data2 %>% #Create an overall view of family income for the respondents 
+    mutate(income_family = fct_relevel(income_family, 
+            "25k or less", "25k to 50k", "50k to 75k", 
+            "75k to 100k", "100k to 125k", "125k or more")) %>%
+  ggplot(aes(x = income_family)) +
+  geom_bar(aes(y = (..count..)/sum(..count..)), stat = "count", fill = "steelblue") + 
+  scale_y_continuous(labels=scales::percent) + #Make it a percentage based scale
+  labs(title = "Respondants by Family/Household Income", y = "Percentage Frequencies", x = "Family/Household Income")+
+  theme_minimal()  #Adjust how it is displayed 
+  
+Figure2 
+```
+
+It is evident in the figure above that our sample does contain a large proportion that has income greater than $125,000 which can result in bias in our results. 
+
+### Weaknesses and Next Steps 
+
+Using the GSS dataset from 2017 may lead to weaknesses in our dataset. Because we use an exclusive dataset to the year 2017, our data is limited and may be exposed to biases from that year. This may skew our results in a direction that might not be indicative of the real results. A solution to this problem is to survey participants over multiple years; this allows our data to contain more information and be less biased.
+
+Another potential weakness of the dataset is that it only contains information on Canadian participants. This can be viewed as a weakness because it prevents our results from generalizable to a different country. If we examined another country that is not in North America, our results might differ drastically. A potential solution to this weakness is to gather information in different countries around the world. That way, we have information on other countries, and our results can be more generalizable. 
+
+Since we are modeling what factors influence a woman’s choice to have children, it would be ideal for collecting longitudinal data. Because we are only collecting information at a certain point in time, our analysis may be missing out on certain influential factors. Collecting data from someone who is 80 years old will be drastically different from collecting data from someone in their 20s. The older our respondents are, the more likely they are to have already had a child at some point in their life.  A solution to this problem could be to collect longitudinal data to compare all respondents from the same perspective. Another solution, in this case, could be to conduct an in-depth interview rather than a survey. An in-depth interview ensures that we receive more detailed responses. Asking questions about when they decided to have children and what their life situation was like can provide much more meaningful information and more meaningful results. 
+
+The dataset we used in the analysis has an average that is much older than the average Canadian population and an average income relatively high. To address this issue, the next step in this analysis can be to used post-stratification. This allows our sample to reflect the population, making our results more meaningful and more accurate. 
 
 ## References
+
 - Monica Alexander (2019). “Analyzing Name Changes after Marriage Using a Non-Representative Survey.” Monica Alexander, 7 Sept. 2019, www.monicaalexander.com/posts/2019-08-07-mrp/.
 - Rohan Alexander and Sam Caetano (2020). "GSS_Cleaning" Retreived from https://q.utoronto.ca/courses/184062
 - JJ Allaire and Yihui Xie and Jonathan McPherson and Javier Luraschi and Kevin Ushey and Aron Atkins and Hadley Wickham and Joe Cheng
