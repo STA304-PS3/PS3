@@ -124,44 +124,7 @@ where p is the probability that a woman has children, $\beta_0$ is the intercept
 
 We use `glm()` from `stats` package in `R` to fir the model to our data. We use `as.factor()` to incorporate dummy variables for all the categorical variables: family income, education level and the type of population center. For each categorical variable with n levels, we need n-1 dummy variables to fully study its influence on our response variable. 
 
-The dummy variables setting ups are stated in table x, y and z.
-
-```{r}
-dummy_income <- data.frame(
-  "income level" = c("greater than $125,000", "between $25,000 to $49,999", "between $50,000 to $74,999", "between $75,000 to $99,999", "less than $25,000", "between $100,000 tp $124,999"),
-  inc1 = c(1,0,0,0,0,0),
-  inc2 = c(0,1,0,0,0,0),
-  inc3 = c(0,0,1,0,0,0),
-  inc4 = c(0,0,0,1,0,0),
-  inc5 = c(0,0,0,0,1,0),
-  inc6 = c(0,0,0,0,0,0)
-)
-
-kable(dummy_income, caption = "Dummy Variable Coding Set Up for Income Levels")
-```
-
-```{r}
-dummy_edu <- data.frame(
-  "education level" = c("high school or less education", "University Graduate", "University Undergraduate", "college/trade"),
-  HS = c(1,0,0,0),
-  graduate = c(0,1,0,0),
-  under = c(0,0,1,0),
-  college = c(0,0,0,0)
-)
-
-kable(dummy_edu, caption = "Dummy Variable Coding Set Up for Education Levels")
-```
-
-```{r}
-dummy_pop <- data.frame(
-  "population center" = c("Poplation centered at PEI", "Rural areas and small population centres(non CMA/CA)", "Larger urban population centres (CMA/CA)"),
-  PEI = c(1,0,0),
-  rural = c(0,1,0),
-  urban = c(0,0,0)
-)
-
-kable(dummy_pop, caption = "Dummy Variable Coding Set Up for Population Center")
-```
+The dummy variables setting ups are stated in table 3, 4 and 5 in the appendix.
 
 ```{r, include = FALSE}
 #logistic regression
@@ -170,19 +133,18 @@ my_logit_dd <- glm(
   + as.factor(pop_center),
   data = my_data, family = "binomial"
 )
-
-summary(my_logit_dd)
 ```
 
 ## Results
 
-Table x summaries our model results:
+Table 2 summaries our model results:
 
 ```{r}
+#creating the summary table
 my_log_res <- data.frame(
-  variable = c("intercept","age", "income greater than $125,000", "income between $25,000 to $49,999", "income between $50,000 to $74,999", "income between $75,000 to $99,999", "income less than $25,000", "high school or less education", "University Graduate", "University Undergraduate","Poplation centered at PEI", "Rural areas and small population centres(non CMA/CA)"),
-  estimate = c(-1.513991, 0.060790, 0.161424, -0.680099, -0.449230, -0.197017, -0.872898, -0.102521, -0.779989, -0.468140, 0.276375, 0.526007),
-  pvalue = c("< 2e-16", "< 2e-16", "0.0810", "8.24e-13", "3.49e-06", "0.0491", "< 2e-16", "0.0982", "< 2e-16", "9.25e-13", "0.0409", "2.86e-14" )
+  variable = c("intercept","age", "income greater than $125,000", "income between $25,000 to $49,999", "income between $50,000 to $74,999", "income between $75,000 to $99,999", "income less than $25,000", "high school or less education", "University Graduate", "University Undergraduate","Poplation centered at PEI", "Rural areas and small population centres(non CMA/CA)"),#list of all variable names including levels
+  estimate = c(-1.513991, 0.060790, 0.161424, -0.680099, -0.449230, -0.197017, -0.872898, -0.102521, -0.779989, -0.468140, 0.276375, 0.526007),# list of estimate results
+  pvalue = c("< 2e-16", "< 2e-16", "0.0810", "8.24e-13", "3.49e-06", "0.0491", "< 2e-16", "0.0982", "< 2e-16", "9.25e-13", "0.0409", "2.86e-14" )# list of p values
 )
 
 kable(my_log_res, caption = "Summary of Losgistic Estimates", 
@@ -337,6 +299,50 @@ Since we are modeling what factors influence a woman’s choice to have children
 The dataset we used in the analysis has an average that is much older than the average Canadian population and an average income relatively high. To address this issue, the next step in this analysis can be to use post-stratification. This allows our sample to reflect the population, making our results more meaningful and more accurate. 
 
 With these next steps this data can help to identify patterns in women's decisions to give birth and possible barriers women making that decision may have to face. 
+
+## Appendix
+
+### Table 3
+```{r}
+dummy_income <- data.frame(
+  "income level" = c("greater than $125,000", "between $25,000 to $49,999", "between $50,000 to $74,999", "between $75,000 to $99,999", "less than $25,000", "between $100,000 tp $124,999"),
+  inc1 = c(1,0,0,0,0,0),
+  inc2 = c(0,1,0,0,0,0),
+  inc3 = c(0,0,1,0,0,0),
+  inc4 = c(0,0,0,1,0,0),
+  inc5 = c(0,0,0,0,1,0),
+  inc6 = c(0,0,0,0,0,0)
+)
+
+kable(dummy_income, caption = "Dummy Variable Coding Set Up for Income Levels")
+```
+
+
+### Table 4
+```{r}
+dummy_edu <- data.frame(
+  "education level" = c("high school or less education", "University Graduate", "University Undergraduate", "college/trade"),
+  HS = c(1,0,0,0),
+  graduate = c(0,1,0,0),
+  under = c(0,0,1,0),
+  college = c(0,0,0,0)
+)
+
+kable(dummy_edu, caption = "Dummy Variable Coding Set Up for Education Levels")
+```
+
+
+### Table 5
+```{r}
+dummy_pop <- data.frame(
+  "population center" = c("Poplation centered at PEI", "Rural areas and small population centres(non CMA/CA)", "Larger urban population centres (CMA/CA)"),
+  PEI = c(1,0,0),
+  rural = c(0,1,0),
+  urban = c(0,0,0)
+)
+
+kable(dummy_pop, caption = "Dummy Variable Coding Set Up for Population Center")
+```
 
 ## References
 
