@@ -12,7 +12,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, warning=FALSE)
 library(dplyr)
 library(knitr)
 library(ggplot2)
@@ -302,10 +302,14 @@ With these next steps this data can help to identify patterns in women's decisio
 
 ## Appendix
 
+## Dummy variable setups for income, education, and population center
+
+Below are the dummy variable setups for income, education, and population center 
+
 ### Table 3
 ```{r}
 dummy_income <- data.frame(
-  "income level" = c("greater than $125,000", "between $25,000 to $49,999", "between $50,000 to $74,999", "between $75,000 to $99,999", "less than $25,000", "between $100,000 tp $124,999"),
+  "income level" = c("greater than $125,000", "between $25,000 to $49,999", "between $50,000 to $74,999", "between $75,000 to $99,999", "less than $25,000", "between $100,000 to $124,999"),
   inc1 = c(1,0,0,0,0,0),
   inc2 = c(0,1,0,0,0,0),
   inc3 = c(0,0,1,0,0,0),
@@ -313,7 +317,6 @@ dummy_income <- data.frame(
   inc5 = c(0,0,0,0,1,0),
   inc6 = c(0,0,0,0,0,0)
 )
-
 kable(dummy_income, caption = "Dummy Variable Coding Set Up for Income Levels", format = "markdown")
 ```
 
@@ -327,7 +330,6 @@ dummy_edu <- data.frame(
   under = c(0,0,1,0),
   college = c(0,0,0,0)
 )
-
 kable(dummy_edu, caption = "Dummy Variable Coding Set Up for Education Levels", format = "markdown")
 ```
 
@@ -340,9 +342,197 @@ dummy_pop <- data.frame(
   rural = c(0,1,0),
   urban = c(0,0,0)
 )
-
 kable(dummy_pop, caption = "Dummy Variable Coding Set Up for Population Center", format = "markdown")
 ```
+
+## Git Repository 
+
+The link to the Git Repository is: https://github.com/STA304-PS3/PS3
+
+## Code 
+
+Below you will also find the R code used in this analysis: 
+
+### Preamble — setting up libraries and setting up the logistic regression 
+
+```{r, include=TRUE, echo =TRUE}
+knitr::opts_chunk$set(echo = FALSE)
+library(dplyr)
+library(knitr)
+library(ggplot2)
+library(tidyverse)
+library(scales)
+library(kableExtra)
+```
+
+```{r, include = TRUE, echo =TRUE}
+#logistic regression
+my_logit_dd <- glm(
+  child ~ age + as.factor(income_family) + as.factor(education_level) 
+  + as.factor(pop_center),
+  data = my_data, family = "binomial"
+)
+```
+
+### Code for tables and figures used in analysis 
+
+### Table 1
+
+```{r, echo=TRUE, results = "hide", warning= FALSE}
+my_data <- read.csv("gss-prepared-for-analysis.csv") #read in the data
+display_data <- my_data %>% #Select variables of interest
+  select(
+    caseid,
+    sex,
+    child,
+    age,
+    income_family,
+    education_level,
+    pop_center
+  )
+#Shorten the response descriptions
+display_data[display_data=="Larger urban population centres (CMA/CA)"] <- "Urban"
+display_data[display_data==
+            "Rural areas and small population centres (non CMA/CA)"] <- "Rural"
+display_data[display_data=="$25,000 to $49,999"] <- "25k to 50k"
+display_data[display_data=="Less than $25,000"] <- "25k or less"
+display_data[display_data=="$50,000 to $74,999"] <- "50k to 75k"
+display_data[display_data=="$75,000 to $99,999"] <- "75k to 100k"
+display_data[display_data=="$100,000 to $ 124,999"] <- "100k to 125k"
+display_data[display_data=="$125,000 and more"] <- "125k or more"
+# Table 1 of the first couple responses
+Table1 <- head(display_data) %>%
+  kable(align = "c",
+        format = "simple",
+        col.names = c("Case ID", "Sex", "Have Children", "Age",
+                      "Family Income", "Education Level", "Urban / Rural"),
+        ) %>%
+  kable_styling(font_size = 5)
+
+Table1
+```
+
+### Table 2
+```{r, echo=TRUE, results = "hide", warning= FALSE}
+#creating the summary table
+my_log_res <- data.frame(
+  variable = c("intercept","age", "income greater than $125,000", "income 
+               between $25,000 to $49,999", "income between $50,000 to $74,999",
+               "income between $75,000 to $99,999", "income less than $25,000", 
+               "high school or less education", "University Graduate", 
+               "University Undergraduate","Poplation centered at PEI", "Rural 
+               areas and small population centres(non CMA/CA)"),#list of all 
+  #variable names including levels
+  estimate = c(-1.513991, 0.060790, 0.161424, -0.680099, -0.449230, -0.197017, 
+               -0.872898, -0.102521, -0.779989, -0.468140, 0.276375, 0.526007),
+  # list of estimate results
+  pvalue = c("< 2e-16", "< 2e-16", "0.0810", "8.24e-13", "3.49e-06", "0.0491", 
+             "< 2e-16", "0.0982", "< 2e-16", "9.25e-13", "0.0409", "2.86e-14" )
+  # list of p values
+)
+kable(my_log_res, caption = "Summary of Losgistic Estimates",
+      label = "Data Source: GSS2017")
+```
+
+### Table 3
+```{r, echo=TRUE, results = "hide", warning= FALSE}
+dummy_income <- data.frame(
+  "income level" = c("greater than $125,000", "between $25,000 to $49,999", 
+                     "between $50,000 to $74,999", "between $75,000 to $99,999",
+                     "less than $25,000", "between $100,000 tO $124,999"),
+  inc1 = c(1,0,0,0,0,0),
+  inc2 = c(0,1,0,0,0,0),
+  inc3 = c(0,0,1,0,0,0),
+  inc4 = c(0,0,0,1,0,0),
+  inc5 = c(0,0,0,0,1,0),
+  inc6 = c(0,0,0,0,0,0)
+)
+kable(dummy_income, caption = "Dummy Variable Coding Set Up for Income Levels")
+```
+
+
+### Table 4
+```{r, echo=TRUE, results = "hide", warning= FALSE}
+dummy_edu <- data.frame(
+  "education level" = c("high school or less education", "University Graduate",
+                        "University Undergraduate", "college/trade"),
+  HS = c(1,0,0,0),
+  graduate = c(0,1,0,0),
+  under = c(0,0,1,0),
+  college = c(0,0,0,0)
+)
+kable(dummy_edu, caption = "Dummy Variable Coding Set Up for Education Levels")
+```
+
+
+### Table 5
+```{r,echo=TRUE, results = "hide", warning= FALSE}
+dummy_pop <- data.frame(
+  "population center" = c("Poplation centered at PEI", "Rural areas and small 
+                          population centres(non CMA/CA)", "Larger urban 
+                          population centres (CMA/CA)"),
+  PEI = c(1,0,0),
+  rural = c(0,1,0),
+  urban = c(0,0,0)
+)
+kable(dummy_pop, caption = "Dummy Variable Coding Set Up for Population Center")
+```
+
+### Figure 1
+```{r, include = TRUE, echo = TRUE}
+Figure1 <- my_data %>% #Create an overall view of Age of respondents
+  ggplot(aes(x = age_group)) +
+  geom_bar(aes(y = ..prop..), stat = "count", fill = "steelblue") +
+  scale_y_continuous(labels=scales::percent) +
+  labs(title = "Respondants by Age Group", y = "Percentage Frequencies", 
+       x = "Age Group")+
+  theme_minimal()  #Adjust how it is displayed
+```
+
+### Figure 2
+```{r, include = TRUE, echo = TRUE}
+display_data2 <- my_data %>% #select smaller subset fo data
+  select(
+    age_group,
+    income_family
+  )
+#Shorten the responses
+display_data2[display_data2=="$25,000 to $49,999"] <- "25k to 50k"
+display_data2[display_data2=="Less than $25,000"] <- "25k or less"
+display_data2[display_data2=="$50,000 to $74,999"] <- "50k to 75k"
+display_data2[display_data2=="$75,000 to $99,999"] <- "75k to 100k"
+display_data2[display_data2=="$100,000 to $ 124,999"] <- "100k to 125k"
+display_data2[display_data2=="$125,000 and more"] <- "125k or more"
+Figure2 <- display_data2 %>% 
+  #Create an overall view of family income for the respondents
+    mutate(income_family = fct_relevel(income_family,
+            "25k or less", "25k to 50k", "50k to 75k",
+            "75k to 100k", "100k to 125k", "125k or more")) %>%
+  ggplot(aes(x = income_family)) +
+  geom_bar(aes(y = (..count..)/sum(..count..)), stat = "count",
+           fill = "steelblue") +
+  scale_y_continuous(labels=scales::percent) + #Make it a percentage based scale
+  labs(title = "Respondants by Family/Household Income", 
+       y = "Percentage Frequencies", x = "Family/Household Income")+
+  theme_minimal()  #Adjust how it is displayed
+```
+
+### Figure 3
+```{r, include = TRUE, echo = TRUE}
+Figure3 <- my_data %>% #Create an overall view of education level of respondents
+  mutate(education_level = fct_relevel(education_level,
+            "HS or less", "College / Trade", "University Undergraduate",
+            "University Graduate")) %>%
+  ggplot(aes(x = education_level)) +
+  geom_bar(aes(y = (..count..)/sum(..count..)), stat = "count", 
+           fill = "steelblue") +
+  scale_y_continuous(labels=scales::percent) +
+  labs(title = "Respondants by Education Level", y = "Percentage Frequencies", 
+       x = "Education Level")+
+  theme_minimal()  #Adjust how it is displayed
+
+```
+
 
 ## References
 
