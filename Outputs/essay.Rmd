@@ -186,18 +186,23 @@ Having said all this the average likelihood or probability that a woman would ha
 
 ## Model
 
-We are interested in how variables such as age, family income, education level, and population center affect a woman’s decision to have children. Due to the large sample size and the nature of GSS, the sample represents the population well. The model that we are using is logistic regression, it works well for our response variable, which is a categorical variable, and it incorporates both numerical and categorical explanatory variables. 
+The model that we are using is logistic regression. We are interested in how variables such as age, family income, education level, and the type of population center(of the area that she lives in) affect a woman’s decision to have children. The response variable that we are interested in is whether a woman has children, which is a categorical variable with two levels: 0 represents not having children, and 1 means having children. The first explanatory variable is age. This is the variable that we want to be specific because the specific age instead of age group provides a lot more information than age groups. For example, it is very unlikely that a woman has children at age 22 but not very unlikely for 23 or 24. Which makes sense because at 22, most people are still studying, and it is possible to get married after graduation and to have children after then. The ladder three are categorical variables because we are interested in their effects on the childbirth decision as a group. We want it to be easy to get the rough probability that a woman has children, given some of the most basic information. 
+
+Logistic regression allows us the simplicity of analyzing the categorical response variable while incorporating both numerical and categorical explanatory variables. Due to the large sample size and the nature of GSS, the sample represents the population well for a rough estimate. If a more precise estimate is necessary, we can simply post-stratify on top of the logistic regression model results.
 
 Logistic regression estimates $\beta_0...\beta_k$ in the following equation:
 $$
 log(\frac{p}{1-p})=\beta_0+\beta_1x_1+...+\beta_kx_k
 $$
-In our case, it estimates $\beta_{age},\beta_{inc},\beta_{edu},\beta_{pop}$ in:
+where p is the probability of event A that we are interested in, $\beta_0$is the intercept, $x_1...x_K$ are our variables of interest and $\beta_1...\beta_k$ are parameters for each of these variables. Based on the result, we are able to estimate p for a particular case given all the variables.
+
+In our case, we want to estimate $\beta_{age},\beta_{inc},\beta_{edu},\beta_{pop}$ in:
 $$
 log(\frac{p}{1-p})=\beta_0+\beta_{age}x_{age}+\beta_{inc}x_{inc}+\beta_{edu}x_{edu}+\beta_{pop}x_{pop}
 $$
+where p is the probability that a woman has children, $\beta_0$ is the intercept, $\beta_{age}$ is the parameter for age, $\beta_{inc}$ is the parameter for family income, $\beta_{edu}$ is the parameter for education level and $\beta_{pop}$ is the parameter for the type of population center. 
 
-We use `glm()` from `stats` package to fir the model to our data. We use `as.factor()` to incorporate dummy variables for all the categorical variables: family income, education level and the type of population center. For each categorical variable with n levels, we need n-1 dummy variables to fully study its influence on our response variable. 
+We use `glm()` from `stats` package in `R` to fir the model to our data. We use `as.factor()` to incorporate dummy variables for all the categorical variables: family income, education level and the type of population center. For each categorical variable with n levels, we need n-1 dummy variables to fully study its influence on our response variable. 
 
 The dummy variables setting ups are stated in table x, y and z.
 
